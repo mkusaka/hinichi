@@ -38,12 +38,23 @@ async function fetchMarkdownViaRendering(url: string, config: BrowserRenderingCo
   return "";
 }
 
+function hasValidConfig(config: BrowserRenderingConfig): boolean {
+  return config.accountId.length > 0 && config.apiToken.length > 0;
+}
+
 export async function fetchArticleContents(
   entries: HatenaEntry[],
   config: BrowserRenderingConfig,
   maxArticles = 20,
 ): Promise<ArticleContent[]> {
   const targets = entries.slice(0, maxArticles);
+
+  if (!hasValidConfig(config)) {
+    return targets.map((entry) => ({
+      entry,
+      bodyText: entry.description,
+    }));
+  }
 
   const results = await Promise.allSettled(
     targets.map(async (entry) => {
