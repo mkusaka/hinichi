@@ -83,8 +83,9 @@ export function renderHtmlPage(
 
     .controls { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; }
     .controls label { font-size: 0.8rem; color: var(--ink-muted); display: flex; flex-direction: column; gap: 0.25rem; }
-    .controls select { font-family: var(--sans); font-size: 0.85rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); color: var(--ink); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; padding-right: 1.5rem; }
-    .controls select:focus { outline: none; border-color: var(--accent); }
+    .controls select, .controls input[type="date"] { font-family: var(--sans); font-size: 0.85rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); color: var(--ink); cursor: pointer; }
+    .controls select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; padding-right: 1.5rem; }
+    .controls select:focus, .controls input[type="date"]:focus { outline: none; border-color: var(--accent); }
     .feed-links { margin-left: auto; display: flex; gap: 0.5rem; }
     .feed-links a { font-size: 0.75rem; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.3rem 0.5rem; transition: border-color 0.15s, color 0.15s; }
     .feed-links a:hover { border-color: var(--accent); color: var(--accent); }
@@ -135,6 +136,9 @@ export function renderHtmlPage(
           ${categoryOptions}
         </select>
       </label>
+      <label>日付
+        <input type="date" id="sel-date" value="${dateStr}" />
+      </label>
       <label>フォーマット
         <select id="sel-format">
           ${formatOptions}
@@ -161,15 +165,17 @@ export function renderHtmlPage(
   <script>
     function navigate() {
       var cat = document.getElementById('sel-category').value;
+      var dateVal = document.getElementById('sel-date').value.replace(/-/g, '');
       var fmt = document.getElementById('sel-format').value;
       var sum = document.getElementById('sel-summary').value;
       var params = new URLSearchParams();
       params.set('format', fmt);
-      params.set('date', '${options.currentDate}');
+      params.set('date', dateVal);
       if (sum) params.set('summary', sum);
       window.location.href = '/' + cat + '?' + params.toString();
     }
     document.getElementById('sel-category').addEventListener('change', navigate);
+    document.getElementById('sel-date').addEventListener('change', navigate);
     document.getElementById('sel-format').addEventListener('change', navigate);
     document.getElementById('sel-summary').addEventListener('change', navigate);
     document.getElementById('btn-revalidate').addEventListener('click', function() {
