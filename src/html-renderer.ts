@@ -230,6 +230,46 @@ function buildCopyText(summary: AISummaryResult): string {
   return lines.join("\n");
 }
 
+export function renderErrorPage(message: string, dateStr: string, category: Category): string {
+  const label = CATEGORY_LABELS[category];
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hinichi — エラー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink: #1a1a1a; --ink-muted: #888; --bg: #fafaf8; --border: #e0ddd8; --accent: #c0392b; --serif: 'Noto Serif JP', serif; --sans: 'Noto Sans JP', sans-serif; }
+    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    header { border-bottom: 3px double var(--border); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+    header h1 { font-family: var(--serif); font-size: 1.75rem; margin: 0; }
+    .error-box { border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 2rem; margin: 2rem 0; }
+    .error-box h2 { font-family: var(--serif); font-size: 1.2rem; margin: 0 0 0.75rem; color: var(--accent); }
+    .error-box p { color: var(--ink-muted); line-height: 1.7; margin: 0 0 1rem; }
+    .error-box a { color: var(--accent); text-decoration: none; }
+    .error-box a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>日日 <span style="font-family: var(--sans); font-weight: 400; font-size: 0.6em; color: var(--ink-muted);">hinichi</span></h1>
+    </header>
+    <div class="error-box">
+      <h2>${esc(message)}</h2>
+      <p>${esc(label)} カテゴリの ${esc(dateStr)} のエントリーが見つかりませんでした。</p>
+      <p>日付を変更するか、別のカテゴリをお試しください。</p>
+      <p><a href="/${category}?format=html">最新のエントリーを見る</a></p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 function esc(str: string): string {
   return str
     .replace(/&/g, "&amp;")

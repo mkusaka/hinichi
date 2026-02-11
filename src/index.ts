@@ -6,8 +6,8 @@ import { generateObject } from "ai";
 import { extractEntries } from "./entry-collector";
 import { fetchArticleContents, type ArticleContent } from "./article-fetcher";
 import { generateFeed } from "./feed-generator";
-import { renderHtmlPage } from "./html-renderer";
-import { CATEGORIES, type AISummaryResult, type Env, type HatenaEntry } from "./types";
+import { renderHtmlPage, renderErrorPage } from "./html-renderer";
+import { CATEGORIES, CATEGORY_LABELS, type AISummaryResult, type Category, type Env, type HatenaEntry } from "./types";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -108,15 +108,14 @@ app.get(
     }
 
     const { entries, resolvedDate } = await fetchHatenaEntries(category, dateParam, !date);
-    if (!entries) {
-      return c.json({ error: `failed to fetch hatena entries` }, 502);
-    }
-    if (entries.length === 0) {
-      return c.json({ error: "no entries found" }, 404);
-    }
     const effectiveDate = resolvedDate || dateParam;
-
     const displayDate = formatDateForDisplay(effectiveDate);
+
+    if (!entries || entries.length === 0) {
+      const message = !entries ? "データの取得に失敗しました" : "エントリーが見つかりませんでした";
+      const status = !entries ? 502 : 404;
+      return buildErrorResponse(format, message, displayDate, category, status);
+    }
 
     let aiSummary: AISummaryResult | undefined;
     if (wantSummary) {
@@ -184,6 +183,44 @@ app.get(
     return response;
   },
 );
+
+function buildErrorResponse(
+  format: string,
+  message: string,
+  dateStr: string,
+  category: Category,
+  status: number,
+): Response {
+  if (format === "html") {
+    return new Response(renderErrorPage(message, dateStr, category), {
+      status,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  }
+
+  if (format === "json") {
+    return new Response(JSON.stringify({ error: message, date: dateStr, category }), {
+      status,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
+
+  const feed = generateFeed([], category, dateStr, "");
+  feed.addItem({
+    title: message,
+    id: `error-${category}-${dateStr}`,
+    link: `https://b.hatena.ne.jp/hotentry/${category}`,
+    description: `${CATEGORY_LABELS[category]} (${dateStr}): ${message}`,
+    date: new Date(),
+  });
+
+  const contentType = format === "atom"
+    ? "application/atom+xml; charset=utf-8"
+    : "application/rss+xml; charset=utf-8";
+  const output = format === "atom" ? feed.atom1() : feed.rss2();
+
+  return new Response(output, { status, headers: { "Content-Type": contentType } });
+}
 
 const aiSummarySchema = z.object({
   overview: z.string().describe("全記事を俯瞰した日本語のトレンドまとめ（3-5文）"),
