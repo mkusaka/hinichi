@@ -94,6 +94,24 @@ function buildCacheKey(
   return url.toString();
 }
 
+interface ErrorResponseOptions {
+  details?: string[];
+  linkHref?: string;
+  linkLabel?: string;
+}
+
+function getMissingAISummaryBindings(env: Env): string[] {
+  const requiredBindings = [
+    ["GOOGLE_AI_API_KEY", env.GOOGLE_AI_API_KEY],
+    ["BROWSER_RENDERING_ACCOUNT_ID", env.BROWSER_RENDERING_ACCOUNT_ID],
+    ["BROWSER_RENDERING_API_TOKEN", env.BROWSER_RENDERING_API_TOKEN],
+  ] as const;
+
+  return requiredBindings
+    .filter(([, value]) => typeof value !== "string" || value.trim().length === 0)
+    .map(([name]) => name);
+}
+
 app.get(
   "/:category",
   zValidator("param", paramSchema),
@@ -110,6 +128,27 @@ app.get(
     const revalidate = revalidateParam != null;
     const wantSummary = summaryParam === "ai" || summaryParam === "aiOnly";
     const summaryOnly = summaryParam === "aiOnly";
+
+    if (wantSummary) {
+      const missingBindings = getMissingAISummaryBindings(c.env);
+      if (missingBindings.length > 0) {
+        return buildErrorResponse(
+          format,
+          "AI要約の設定が不足しています",
+          formatDateForDisplay(dateParam),
+          category,
+          500,
+          {
+            details: [
+              `不足している環境変数: ${missingBindings.join(", ")}`,
+              "Cloudflare環境変数を設定するか、summary パラメータを外してアクセスしてください。",
+            ],
+            linkHref: `/${category}?format=html&date=${dateParam}`,
+            linkLabel: "AI要約なしで表示する",
+          },
+        );
+      }
+    }
 
     const baseUrl = new URL(c.req.url).origin;
     const cache = typeof caches !== "undefined" ? caches.default : null;
@@ -218,16 +257,37 @@ function buildErrorResponse(
   dateStr: string,
   category: Category,
   status: number,
+  options: ErrorResponseOptions = {},
 ): Response {
   if (format === "html") {
-    return new Response(renderErrorPage(message, dateStr, category), {
-      status,
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
+    return new Response(
+      renderErrorPage(message, dateStr, category, {
+        details: options.details,
+        linkHref: options.linkHref,
+        linkLabel: options.linkLabel,
+      }),
+      {
+        status,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      },
+    );
   }
 
   if (format === "json") {
-    return new Response(JSON.stringify({ error: message, date: dateStr, category }), {
+    const payload: {
+      error: string;
+      date: string;
+      category: Category;
+      details?: string[];
+    } = {
+      error: message,
+      date: dateStr,
+      category,
+    };
+    if (options.details) {
+      payload.details = options.details;
+    }
+    return new Response(JSON.stringify(payload), {
       status,
       headers: { "Content-Type": "application/json; charset=utf-8" },
     });
@@ -238,7 +298,9 @@ function buildErrorResponse(
     title: message,
     id: `error-${category}-${dateStr}`,
     link: `https://b.hatena.ne.jp/hotentry/${category}`,
-    description: `${CATEGORY_LABELS[category]} (${dateStr}): ${message}`,
+    description: options.details?.length
+      ? `${CATEGORY_LABELS[category]} (${dateStr}): ${message}\n${options.details.join(" / ")}`
+      : `${CATEGORY_LABELS[category]} (${dateStr}): ${message}`,
     date: new Date(),
   });
 

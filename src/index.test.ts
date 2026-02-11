@@ -1,5 +1,6 @@
 import { SELF, fetchMock } from "cloudflare:test";
 import { describe, it, expect, beforeAll, afterEach } from "vitest";
+import app from "./index";
 
 beforeAll(() => {
   fetchMock.activate();
@@ -61,6 +62,28 @@ describe("GET /:category", () => {
   it("returns 400 for invalid date format", async () => {
     const res = await SELF.fetch("http://localhost/it?date=2026-02-10");
     expect(res.status).toBe(400);
+  });
+
+  it("returns descriptive error for summary request when AI bindings are missing", async () => {
+    const res = await app.request(
+      "http://localhost/it?format=json&summary=ai&date=20260210",
+      undefined,
+      {
+        GOOGLE_AI_API_KEY: "",
+        BROWSER_RENDERING_ACCOUNT_ID: "",
+        BROWSER_RENDERING_API_TOKEN: "",
+      },
+    );
+    expect(res.status).toBe(500);
+
+    const body = (await res.json()) as {
+      error: string;
+      details?: string[];
+    };
+    expect(body.error).toBe("AI要約の設定が不足しています");
+    expect(body.details?.join("\n")).toContain("GOOGLE_AI_API_KEY");
+    expect(body.details?.join("\n")).toContain("BROWSER_RENDERING_ACCOUNT_ID");
+    expect(body.details?.join("\n")).toContain("BROWSER_RENDERING_API_TOKEN");
   });
 
   it("returns RSS feed with extracted entries", async () => {
