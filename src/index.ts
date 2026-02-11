@@ -111,18 +111,11 @@ app.get(
     const effectiveDate = resolvedDate || dateParam;
     const displayDate = formatDateForDisplay(effectiveDate);
 
-    if (effectiveDate !== dateParam) {
-      const redirectUrl = new URL(`/${category}`, baseUrl);
-      redirectUrl.searchParams.set("format", format);
-      redirectUrl.searchParams.set("date", effectiveDate);
-      if (summaryParam) redirectUrl.searchParams.set("summary", summaryParam);
-      return c.redirect(redirectUrl.pathname + redirectUrl.search);
-    }
-
     if (!entries || entries.length === 0) {
+      const requestedDate = formatDateForDisplay(dateParam);
       const message = !entries ? "データの取得に失敗しました" : "エントリーが見つかりませんでした";
       const status = !entries ? 502 : 404;
-      return buildErrorResponse(format, message, displayDate, category, status);
+      return buildErrorResponse(format, message, requestedDate, category, status);
     }
 
     let aiSummary: AISummaryResult | undefined;
