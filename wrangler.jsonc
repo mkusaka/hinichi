@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hatena-daily-rss",
+  "compatibility_date": "2025-12-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./src/index.ts",
+  "ai": {
+    "binding": "AI"
+  }
+}
