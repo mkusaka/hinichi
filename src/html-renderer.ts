@@ -16,6 +16,7 @@ export function renderHtmlPage(
 ): string {
   const label = CATEGORY_LABELS[category];
   const title = `はてなブックマーク - ${label} - ${dateStr}`;
+  const hotentryUrl = `https://b.hatena.ne.jp/hotentry/${category}/${dateStr.replace(/-/g, "")}`;
 
   const summarySection = options.summary ? buildSummarySection(options.summary) : "";
 
@@ -87,6 +88,8 @@ export function renderHtmlPage(
     header { border-bottom: 3px double var(--border); padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
     header h1 { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; margin: 0 0 0.25rem; letter-spacing: 0.02em; }
     header .date { font-size: 0.85rem; color: var(--ink-muted); }
+    header .date a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--border); transition: color 0.15s, border-color 0.15s; }
+    header .date a:hover { color: var(--accent); border-color: var(--accent); }
 
     .controls { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 2rem; }
     .controls label { font-size: 0.8rem; color: var(--ink-muted); display: flex; flex-direction: column; gap: 0.25rem; }
@@ -135,7 +138,7 @@ export function renderHtmlPage(
   <div class="container">
     <header>
       <h1>日日 <span style="font-family: var(--sans); font-weight: 400; font-size: 0.6em; color: var(--ink-muted);">hinichi</span></h1>
-      <div class="date">${esc(label)} — ${esc(dateStr)}</div>
+      <div class="date"><a href="${escapeAttr(hotentryUrl)}">${esc(label)} — ${esc(dateStr)}</a></div>
     </header>
     <div class="controls">
       <label>カテゴリ

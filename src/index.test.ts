@@ -127,6 +127,7 @@ describe("GET /:category", () => {
     expect(body).toContain("テスト記事タイトル1");
     expect(body).toContain("123 users");
     expect(body).toContain("example.com");
+    expect(body).toContain('href="https://b.hatena.ne.jp/hotentry/it/20260210"');
   });
 
   it("returns 502 when hatena returns error", async () => {
