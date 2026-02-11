@@ -94,15 +94,10 @@ app.get(
     const summaryOnly = summaryParam === "aiOnly";
 
     const baseUrl = new URL(c.req.url).origin;
-    const cacheKey = buildCacheKey(baseUrl, category, dateParam, format, summaryParam);
     const cache = typeof caches !== "undefined" ? caches.default : null;
 
-    if (cache) {
-      if (revalidate) {
-        await cache.delete(cacheKey);
-        const url = new URL(cacheKey);
-        return c.redirect(url.pathname + url.search);
-      }
+    if (date && cache && !revalidate) {
+      const cacheKey = buildCacheKey(baseUrl, category, dateParam, format, summaryParam);
       const cached = await cache.match(cacheKey);
       if (cached) return cached;
     }
@@ -116,6 +111,17 @@ app.get(
       const message = !entries ? "データの取得に失敗しました" : "エントリーが見つかりませんでした";
       const status = !entries ? 502 : 404;
       return buildErrorResponse(format, message, requestedDate, category, status);
+    }
+
+    const cacheKey = buildCacheKey(baseUrl, category, effectiveDate, format, summaryParam);
+
+    if (cache && !revalidate) {
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+    }
+
+    if (cache && revalidate) {
+      await cache.delete(cacheKey);
     }
 
     let aiSummary: AISummaryResult | undefined;
