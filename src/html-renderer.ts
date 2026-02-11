@@ -81,15 +81,15 @@ export function renderHtmlPage(
     header h1 { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; margin: 0 0 0.25rem; letter-spacing: 0.02em; }
     header .date { font-size: 0.85rem; color: var(--ink-muted); }
 
-    .controls { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; }
+    .controls { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 2rem; }
     .controls label { font-size: 0.8rem; color: var(--ink-muted); display: flex; flex-direction: column; gap: 0.25rem; }
     .controls select, .controls input[type="date"] { font-family: var(--sans); font-size: 0.85rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); color: var(--ink); cursor: pointer; }
     .controls select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; padding-right: 1.5rem; }
     .controls select:focus, .controls input[type="date"]:focus { outline: none; border-color: var(--accent); }
-    .feed-links { margin-left: auto; display: flex; gap: 0.5rem; }
-    .feed-links a { font-size: 0.75rem; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.3rem 0.5rem; transition: border-color 0.15s, color 0.15s; }
+    .feed-links { margin-left: auto; display: flex; gap: 0.5rem; align-items: center; }
+    .feed-links a { font-size: 0.85rem; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.4rem 0.6rem; transition: border-color 0.15s, color 0.15s; }
     .feed-links a:hover { border-color: var(--accent); color: var(--accent); }
-    .revalidate-btn { font-family: var(--sans); font-size: 0.75rem; color: var(--ink-muted); background: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.3rem 0.5rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+    .revalidate-btn { font-family: var(--sans); font-size: 0.85rem; color: var(--ink-muted); background: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.4rem 0.6rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
     .revalidate-btn:hover { border-color: var(--accent); color: var(--accent); }
     .revalidate-btn.loading { opacity: 0.5; pointer-events: none; }
 
