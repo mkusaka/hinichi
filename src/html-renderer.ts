@@ -22,13 +22,15 @@ export function renderHtmlPage(
   const entriesHtml = entries
     .map(
       (e) => `
-    <article>
-      <h3><a href="${escapeAttr(e.url)}">${esc(e.title)}</a></h3>
-      <span class="users">${e.users} users</span>
-      <span class="domain">${esc(e.domain)}</span>
-      <p>${esc(e.description)}</p>
-      ${e.tags.length > 0 ? `<div class="tags">${e.tags.map((t) => `<span>${esc(t)}</span>`).join(" ")}</div>` : ""}
-    </article>`,
+      <article>
+        <h3><a href="${escapeAttr(e.url)}">${esc(e.title)}</a></h3>
+        <div class="meta">
+          <span class="users">${e.users} users</span>
+          <span class="domain">${esc(e.domain)}</span>
+        </div>
+        ${e.description ? `<p>${esc(e.description)}</p>` : ""}
+        ${e.tags.length > 0 ? `<div class="tags">${e.tags.map((t) => `<span>${esc(t)}</span>`).join("")}</div>` : ""}
+      </article>`,
     )
     .join("\n");
 
@@ -54,61 +56,104 @@ export function renderHtmlPage(
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${esc(title)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 800px; margin: 0 auto; padding: 1rem; }
-    article { border-bottom: 1px solid #eee; padding: 1rem 0; }
-    h3 { margin: 0 0 0.5rem; }
-    h3 a { color: #1a0dab; text-decoration: none; }
-    h3 a:hover { text-decoration: underline; }
-    .users { background: #ff6600; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.85rem; }
-    .domain { color: #666; font-size: 0.85rem; margin-left: 0.5rem; }
-    .tags span { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; margin-right: 4px; }
-    .summary { background: #f8f9fa; padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #e9ecef; }
-    .summary h2 { margin-top: 0; }
-    .summary .overview { font-size: 1.05rem; line-height: 1.6; margin-bottom: 1rem; }
-    .summary ul { padding-left: 1.2rem; }
-    .summary li { margin-bottom: 0.5rem; line-height: 1.5; }
-    .summary li a { color: #1a0dab; text-decoration: none; font-weight: 500; }
-    .summary li a:hover { text-decoration: underline; }
-    .summary .article-summary { color: #555; }
-    .summary-header { display: flex; align-items: center; justify-content: space-between; }
-    .copy-btn { background: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.85rem; color: #495057; }
-    .copy-btn:hover { background: #dee2e6; }
-    .copy-btn.copied { background: #d4edda; border-color: #c3e6cb; color: #155724; }
-    .controls { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
-    .controls label { font-size: 0.85rem; color: #495057; }
-    .controls select { padding: 4px 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.85rem; background: white; }
-    .feed-links { margin-left: auto; font-size: 0.85rem; }
-    .feed-links a { color: #495057; margin-left: 0.5rem; text-decoration: none; }
-    .feed-links a:hover { text-decoration: underline; }
+    :root {
+      --ink: #1a1a1a;
+      --ink-light: #555;
+      --ink-muted: #888;
+      --bg: #fafaf8;
+      --bg-card: #fff;
+      --border: #e0ddd8;
+      --accent: #c0392b;
+      --accent-soft: #fdf2f0;
+      --tag-bg: #f0eeea;
+      --serif: 'Noto Serif JP', serif;
+      --sans: 'Noto Sans JP', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    header { border-bottom: 3px double var(--border); padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
+    header h1 { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; margin: 0 0 0.25rem; letter-spacing: 0.02em; }
+    header .date { font-size: 0.85rem; color: var(--ink-muted); }
+
+    .controls { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; }
+    .controls label { font-size: 0.8rem; color: var(--ink-muted); display: flex; flex-direction: column; gap: 0.25rem; }
+    .controls select { font-family: var(--sans); font-size: 0.85rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); color: var(--ink); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; padding-right: 1.5rem; }
+    .controls select:focus { outline: none; border-color: var(--accent); }
+    .feed-links { margin-left: auto; display: flex; gap: 0.5rem; }
+    .feed-links a { font-size: 0.75rem; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.3rem 0.5rem; transition: border-color 0.15s, color 0.15s; }
+    .feed-links a:hover { border-color: var(--accent); color: var(--accent); }
+
+    .summary { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 1.5rem 1.75rem; margin-bottom: 2.5rem; }
+    .summary-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.75rem; }
+    .summary-header h2 { font-family: var(--serif); font-size: 1.15rem; margin: 0; letter-spacing: 0.02em; }
+    .copy-btn { font-family: var(--sans); font-size: 0.75rem; color: var(--ink-muted); background: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.25rem 0.6rem; cursor: pointer; transition: all 0.15s; }
+    .copy-btn:hover { border-color: var(--ink-light); color: var(--ink-light); }
+    .copy-btn.copied { border-color: #27ae60; color: #27ae60; }
+    .summary .overview { font-size: 0.95rem; line-height: 1.8; color: var(--ink-light); margin-bottom: 1.25rem; }
+    .summary h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); margin: 1.25rem 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    .summary ul { list-style: none; padding: 0; margin: 0; }
+    .summary li { padding: 0.5rem 0; border-bottom: 1px solid #f0eeea; line-height: 1.6; }
+    .summary li:last-child { border-bottom: none; }
+    .summary li a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+    .summary li a:hover { color: var(--accent); }
+    .article-summary { display: block; font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.15rem; }
+
+    .entries { display: flex; flex-direction: column; gap: 0; }
+    article { padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+    article:first-child { padding-top: 0; }
+    article h3 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; line-height: 1.5; }
+    article h3 a { color: var(--ink); text-decoration: none; transition: color 0.15s; }
+    article h3 a:hover { color: var(--accent); }
+    .meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
+    .users { font-size: 0.78rem; font-weight: 700; color: var(--accent); }
+    .domain { font-size: 0.78rem; color: var(--ink-muted); }
+    article p { font-size: 0.88rem; color: var(--ink-light); margin: 0.4rem 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
+    .tags span { font-size: 0.72rem; color: var(--ink-muted); background: var(--tag-bg); padding: 0.15rem 0.45rem; border-radius: 2px; }
+
+    footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--ink-muted); text-align: center; }
   </style>
 </head>
 <body>
-  <h1>${esc(title)}</h1>
-  <div class="controls">
-    <label>カテゴリ
-      <select id="sel-category">
-        ${categoryOptions}
-      </select>
-    </label>
-    <label>フォーマット
-      <select id="sel-format">
-        ${formatOptions}
-      </select>
-    </label>
-    <label>サマリ
-      <select id="sel-summary">
-        ${summaryOptions}
-      </select>
-    </label>
-    <span class="feed-links">
-      <a href="/${category}?format=rss${options.currentSummary ? "&summary=" + options.currentSummary : ""}">RSS</a>
-      <a href="/${category}?format=atom${options.currentSummary ? "&summary=" + options.currentSummary : ""}">Atom</a>
-      <a href="/${category}?format=json${options.currentSummary ? "&summary=" + options.currentSummary : ""}">JSON</a>
-    </span>
+  <div class="container">
+    <header>
+      <h1>日日 <span style="font-family: var(--sans); font-weight: 400; font-size: 0.6em; color: var(--ink-muted);">hinichi</span></h1>
+      <div class="date">${esc(label)} — ${esc(dateStr)}</div>
+    </header>
+    <div class="controls">
+      <label>カテゴリ
+        <select id="sel-category">
+          ${categoryOptions}
+        </select>
+      </label>
+      <label>フォーマット
+        <select id="sel-format">
+          ${formatOptions}
+        </select>
+      </label>
+      <label>サマリ
+        <select id="sel-summary">
+          ${summaryOptions}
+        </select>
+      </label>
+      <span class="feed-links">
+        <a href="/${category}?format=rss${options.currentSummary ? "&summary=" + options.currentSummary : ""}&date=${options.currentDate}">RSS</a>
+        <a href="/${category}?format=atom${options.currentSummary ? "&summary=" + options.currentSummary : ""}&date=${options.currentDate}">Atom</a>
+        <a href="/${category}?format=json${options.currentSummary ? "&summary=" + options.currentSummary : ""}&date=${options.currentDate}">JSON</a>
+      </span>
+    </div>
+    ${summarySection}
+    <div class="entries">
+      ${entriesHtml}
+    </div>
+    <footer>hinichi — はてなブックマーク デイリーダイジェスト</footer>
   </div>
-  ${summarySection}
-  ${entriesHtml}
   <script>
     function navigate() {
       var cat = document.getElementById('sel-category').value;
