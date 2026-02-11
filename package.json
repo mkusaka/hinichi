@@ -1,0 +1,37 @@
+{
+  "name": "hinichi",
+  "type": "module",
+  "packageManager": "pnpm@10.19.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "$npm_execpath run build && vite preview",
+    "deploy": "$npm_execpath run build && wrangler deploy",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "test": "vitest run",
+    "lint": "oxlint",
+    "format": "oxfmt src",
+    "format:check": "oxfmt --check src"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.24",
+    "@hono/zod-validator": "^0.7.6",
+    "ai": "^6.0.79",
+    "feed": "^5.2.0",
+    "hono": "^4.11.9",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.24.0",
+    "@cloudflare/vitest-pool-workers": "^0.12.11",
+    "@cloudflare/workers-types": "^4.20260210.0",
+    "@vitest/runner": "~3.2.4",
+    "@vitest/snapshot": "~3.2.4",
+    "oxfmt": "^0.31.0",
+    "oxlint": "^1.46.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.3.5",
+    "vitest": "~3.2.4",
+    "wrangler": "^4.64.0"
+  }
+}
