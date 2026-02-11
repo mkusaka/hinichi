@@ -1,5 +1,5 @@
 {
-  "name": "hatena-daily-rss",
+  "name": "hinichi",
   "type": "module",
   "packageManager": "pnpm@10.19.0",
   "scripts": {

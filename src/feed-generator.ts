@@ -18,7 +18,7 @@ export function generateFeed(
     link: `https://b.hatena.ne.jp/hotentry/${category}/${dateStr.replace(/-/g, "")}`,
     language: "ja",
     updated: new Date(),
-    generator: "hatena-daily-rss",
+    generator: "hinichi",
     feedLinks: {
       atom: `${feedUrl}?format=atom`,
       rss: `${feedUrl}?format=rss`,
