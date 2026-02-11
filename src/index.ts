@@ -68,7 +68,12 @@ app.get(
     const cacheKey = buildCacheKey(baseUrl, category, dateParam, format, summaryParam);
     const cache = typeof caches !== "undefined" ? caches.default : null;
 
-    if (!revalidate && cache) {
+    if (cache) {
+      if (revalidate) {
+        await cache.delete(cacheKey);
+        const url = new URL(cacheKey);
+        return c.redirect(url.pathname + url.search);
+      }
       const cached = await cache.match(cacheKey);
       if (cached) return cached;
     }

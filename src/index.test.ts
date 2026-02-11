@@ -167,4 +167,20 @@ describe("GET /:category", () => {
       expect(res.status).toBe(200);
     }
   });
+
+  it("accepts revalidate parameter", async () => {
+    fetchMock
+      .get("https://b.hatena.ne.jp")
+      .intercept({ path: "/hotentry/it/20260210" })
+      .reply(200, SAMPLE_HTML, { headers: { "content-type": "text/html" } });
+
+    const res = await SELF.fetch("http://localhost/it?format=rss&date=20260210&revalidate=true");
+    expect(res.status).toBe(200);
+  });
+
+  it("redirects root to /all with default params", async () => {
+    const res = await SELF.fetch("http://localhost/", { redirect: "manual" });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe("/all?format=html&summary=ai");
+  });
 });
