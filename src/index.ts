@@ -7,7 +7,7 @@ import { extractEntries } from "./entry-collector";
 import { fetchArticleContents, type ArticleContent } from "./article-fetcher";
 import { generateFeed } from "./feed-generator";
 import { renderHtmlPage } from "./html-renderer";
-import { CATEGORIES, type AISummaryResult, type Env } from "./types";
+import { CATEGORIES, type AISummaryResult, type Env, type HatenaEntry } from "./types";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -44,6 +44,35 @@ app.get("/", (c) => {
   return c.redirect("/all?format=html&summary=ai");
 });
 
+function subtractDays(yyyymmdd: string, days: number): string {
+  const y = parseInt(yyyymmdd.slice(0, 4));
+  const m = parseInt(yyyymmdd.slice(4, 6)) - 1;
+  const d = parseInt(yyyymmdd.slice(6, 8));
+  const date = new Date(Date.UTC(y, m, d) - days * 24 * 60 * 60 * 1000);
+  return [
+    date.getUTCFullYear(),
+    String(date.getUTCMonth() + 1).padStart(2, "0"),
+    String(date.getUTCDate()).padStart(2, "0"),
+  ].join("");
+}
+
+async function fetchHatenaEntries(
+  category: string,
+  dateParam: string,
+  allowRetry: boolean,
+): Promise<{ entries: HatenaEntry[] | null; resolvedDate: string }> {
+  const maxRetries = allowRetry ? 3 : 1;
+  for (let i = 0; i < maxRetries; i++) {
+    const tryDate = i === 0 ? dateParam : subtractDays(dateParam, i);
+    const url = `https://b.hatena.ne.jp/hotentry/${category}/${tryDate}`;
+    const res = await fetch(url);
+    if (!res.ok) continue;
+    const entries = await extractEntries(res);
+    if (entries.length > 0) return { entries, resolvedDate: tryDate };
+  }
+  return { entries: null, resolvedDate: dateParam };
+}
+
 function buildCacheKey(baseUrl: string, category: string, dateParam: string, format: string, summaryParam?: string): string {
   const url = new URL(`/${category}`, baseUrl);
   url.searchParams.set("date", dateParam);
@@ -78,20 +107,16 @@ app.get(
       if (cached) return cached;
     }
 
-    const hatenaUrl = `https://b.hatena.ne.jp/hotentry/${category}/${dateParam}`;
-    const res = await fetch(hatenaUrl);
-
-    if (!res.ok) {
-      return c.json({ error: `failed to fetch: ${res.status}` }, 502);
+    const { entries, resolvedDate } = await fetchHatenaEntries(category, dateParam, !date);
+    if (!entries) {
+      return c.json({ error: `failed to fetch hatena entries` }, 502);
     }
-
-    const entries = await extractEntries(res);
-
     if (entries.length === 0) {
       return c.json({ error: "no entries found" }, 404);
     }
+    const effectiveDate = resolvedDate || dateParam;
 
-    const displayDate = formatDateForDisplay(dateParam);
+    const displayDate = formatDateForDisplay(effectiveDate);
 
     let aiSummary: AISummaryResult | undefined;
     if (wantSummary) {
