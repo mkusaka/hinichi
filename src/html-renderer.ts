@@ -44,8 +44,8 @@ export function renderHtmlPage(
 
   const summaryOptions = [
     { value: "", label: "なし" },
-    { value: "ai", label: "AI サマリ付き" },
-    { value: "aiOnly", label: "AI サマリのみ" },
+    { value: "ai", label: "要約付き" },
+    { value: "aiOnly", label: "要約のみ" },
   ]
     .map((s) => `<option value="${s.value}"${s.value === (options.currentSummary || "") ? " selected" : ""}>${s.label}</option>`)
     .join("\n        ");
@@ -185,7 +185,7 @@ function buildSummarySection(summary: AISummaryResult): string {
 
   return `<section class="summary">
     <div class="summary-header">
-      <h2>AI サマリ</h2>
+      <h2>要約</h2>
       <button class="copy-btn" data-copy-text="${escapeAttr(copyText)}">コピー</button>
     </div>
     <div class="overview">${esc(summary.overview)}</div>
