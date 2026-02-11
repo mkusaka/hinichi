@@ -8,13 +8,18 @@ export interface ArticleContent {
 const MAX_BODY_LENGTH = 3000;
 
 interface BrowserRenderingConfig {
+  accountId?: string;
+  apiToken?: string;
+}
+
+interface ValidBrowserRenderingConfig {
   accountId: string;
   apiToken: string;
 }
 
 async function fetchMarkdownViaRendering(
   url: string,
-  config: BrowserRenderingConfig,
+  config: ValidBrowserRenderingConfig,
 ): Promise<string> {
   const res = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${config.accountId}/browser-rendering/markdown`,
@@ -41,8 +46,13 @@ async function fetchMarkdownViaRendering(
   return "";
 }
 
-function hasValidConfig(config: BrowserRenderingConfig): boolean {
-  return config.accountId.length > 0 && config.apiToken.length > 0;
+function hasValidConfig(config: BrowserRenderingConfig): config is ValidBrowserRenderingConfig {
+  return (
+    typeof config.accountId === "string" &&
+    config.accountId.length > 0 &&
+    typeof config.apiToken === "string" &&
+    config.apiToken.length > 0
+  );
 }
 
 export async function fetchArticleContents(

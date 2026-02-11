@@ -246,8 +246,27 @@ function buildCopyText(summary: AISummaryResult): string {
   return lines.join("\n");
 }
 
-export function renderErrorPage(message: string, dateStr: string, category: Category): string {
+interface ErrorPageOptions {
+  details?: string[];
+  linkHref?: string;
+  linkLabel?: string;
+}
+
+export function renderErrorPage(
+  message: string,
+  dateStr: string,
+  category: Category,
+  options: ErrorPageOptions = {},
+): string {
   const label = CATEGORY_LABELS[category];
+  const details = options.details ?? [
+    `${label} カテゴリの ${dateStr} のエントリーが見つかりませんでした。`,
+    "日付を変更するか、別のカテゴリをお試しください。",
+  ];
+  const linkHref = options.linkHref ?? `/${category}?format=html`;
+  const linkLabel = options.linkLabel ?? "最新のエントリーを見る";
+  const detailsHtml = details.map((line) => `<p>${esc(line)}</p>`).join("\n      ");
+
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -259,7 +278,8 @@ export function renderErrorPage(message: string, dateStr: string, category: Cate
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
   <style>
     :root { --ink: #1a1a1a; --ink-muted: #888; --bg: #fafaf8; --border: #e0ddd8; --accent: #c0392b; --serif: 'Noto Serif JP', serif; --sans: 'Noto Sans JP', sans-serif; }
-    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; line-height: 1.7; -webkit-font-smoothing: antialiased; }
     .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
     header { border-bottom: 3px double var(--border); padding-bottom: 1.25rem; margin-bottom: 2rem; }
     header h1 { font-family: var(--serif); font-size: 1.75rem; margin: 0; }
@@ -277,9 +297,8 @@ export function renderErrorPage(message: string, dateStr: string, category: Cate
     </header>
     <div class="error-box">
       <h2>${esc(message)}</h2>
-      <p>${esc(label)} カテゴリの ${esc(dateStr)} のエントリーが見つかりませんでした。</p>
-      <p>日付を変更するか、別のカテゴリをお試しください。</p>
-      <p><a href="/${category}?format=html">最新のエントリーを見る</a></p>
+      ${detailsHtml}
+      <p><a href="${escapeAttr(linkHref)}">${esc(linkLabel)}</a></p>
     </div>
   </div>
 </body>
