@@ -41,8 +41,9 @@ export const CATEGORY_LABELS: Record<Category, string> = {
 export type OutputFormat = "rss" | "atom" | "json" | "html";
 
 export interface Env {
-  AI: Ai;
   GOOGLE_AI_API_KEY: string;
+  BROWSER_RENDERING_ACCOUNT_ID: string;
+  BROWSER_RENDERING_API_TOKEN: string;
 }
 
 export interface ArticleSummary {

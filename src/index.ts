@@ -4,7 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { extractEntries } from "./entry-collector";
-import { fetchArticleContents, type ArticleContent } from "./article-fetcher";
+import { fetchArticleContents } from "./article-fetcher";
 import { generateFeed } from "./feed-generator";
 import { renderHtmlPage } from "./html-renderer";
 import { CATEGORIES, type AISummaryResult, type Env } from "./types";
@@ -51,9 +51,7 @@ app.get(
     const summaryOnly = summaryParam === "aiOnly";
 
     const hatenaUrl = `https://b.hatena.ne.jp/hotentry/${category}/${dateParam}`;
-    const res = await fetch(hatenaUrl, {
-      headers: { "User-Agent": "hatena-daily-rss/1.0" },
-    });
+    const res = await fetch(hatenaUrl);
 
     if (!res.ok) {
       return c.json({ error: `failed to fetch: ${res.status}` }, 502);
@@ -70,7 +68,10 @@ app.get(
 
     let aiSummary: AISummaryResult | undefined;
     if (wantSummary) {
-      const articles = await fetchArticleContents(entries);
+      const articles = await fetchArticleContents(entries, {
+        accountId: c.env.BROWSER_RENDERING_ACCOUNT_ID,
+        apiToken: c.env.BROWSER_RENDERING_API_TOKEN,
+      });
       aiSummary = await generateAISummary(c.env.GOOGLE_AI_API_KEY, articles);
     }
 
