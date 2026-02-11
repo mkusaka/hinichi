@@ -80,7 +80,14 @@ app.get(
     }
 
     if (format === "html") {
-      return c.html(renderHtmlPage(entries, category, displayDate, aiSummary));
+      return c.html(
+        renderHtmlPage(entries, category, displayDate, {
+          summary: aiSummary,
+          currentFormat: format,
+          currentSummary: summaryParam,
+          currentDate: dateParam,
+        }),
+      );
     }
 
     const feed = summaryOnly

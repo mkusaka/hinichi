@@ -1,16 +1,23 @@
 import type { AISummaryResult, HatenaEntry, Category } from "./types";
-import { CATEGORY_LABELS } from "./types";
+import { CATEGORIES, CATEGORY_LABELS } from "./types";
+
+interface RenderOptions {
+  summary?: AISummaryResult;
+  currentFormat: string;
+  currentSummary?: string;
+  currentDate: string;
+}
 
 export function renderHtmlPage(
   entries: HatenaEntry[],
   category: Category,
   dateStr: string,
-  summary?: AISummaryResult,
+  options: RenderOptions,
 ): string {
   const label = CATEGORY_LABELS[category];
   const title = `はてなブックマーク - ${label} - ${dateStr}`;
 
-  const summarySection = summary ? buildSummarySection(summary) : "";
+  const summarySection = options.summary ? buildSummarySection(options.summary) : "";
 
   const entriesHtml = entries
     .map(
@@ -24,6 +31,22 @@ export function renderHtmlPage(
     </article>`,
     )
     .join("\n");
+
+  const categoryOptions = CATEGORIES.map(
+    (c) => `<option value="${c}"${c === category ? " selected" : ""}>${esc(CATEGORY_LABELS[c])}</option>`,
+  ).join("\n        ");
+
+  const formatOptions = ["html", "rss", "atom", "json"]
+    .map((f) => `<option value="${f}"${f === options.currentFormat ? " selected" : ""}>${f.toUpperCase()}</option>`)
+    .join("\n        ");
+
+  const summaryOptions = [
+    { value: "", label: "なし" },
+    { value: "ai", label: "AI サマリ付き" },
+    { value: "aiOnly", label: "AI サマリのみ" },
+  ]
+    .map((s) => `<option value="${s.value}"${s.value === (options.currentSummary || "") ? " selected" : ""}>${s.label}</option>`)
+    .join("\n        ");
 
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -52,19 +75,55 @@ export function renderHtmlPage(
     .copy-btn { background: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 0.85rem; color: #495057; }
     .copy-btn:hover { background: #dee2e6; }
     .copy-btn.copied { background: #d4edda; border-color: #c3e6cb; color: #155724; }
-    nav { margin-bottom: 1rem; }
-    nav a { margin-right: 1rem; }
+    .controls { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; padding: 0.75rem 1rem; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
+    .controls label { font-size: 0.85rem; color: #495057; }
+    .controls select { padding: 4px 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.85rem; background: white; }
+    .feed-links { margin-left: auto; font-size: 0.85rem; }
+    .feed-links a { color: #495057; margin-left: 0.5rem; text-decoration: none; }
+    .feed-links a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <h1>${esc(title)}</h1>
-  <nav>
-    <a href="/${category}?format=rss">RSS</a>
-    <a href="/${category}?format=atom">Atom</a>
-    <a href="/${category}?format=json">JSON Feed</a>
-  </nav>
+  <div class="controls">
+    <label>カテゴリ
+      <select id="sel-category">
+        ${categoryOptions}
+      </select>
+    </label>
+    <label>フォーマット
+      <select id="sel-format">
+        ${formatOptions}
+      </select>
+    </label>
+    <label>サマリ
+      <select id="sel-summary">
+        ${summaryOptions}
+      </select>
+    </label>
+    <span class="feed-links">
+      <a href="/${category}?format=rss${options.currentSummary ? "&summary=" + options.currentSummary : ""}">RSS</a>
+      <a href="/${category}?format=atom${options.currentSummary ? "&summary=" + options.currentSummary : ""}">Atom</a>
+      <a href="/${category}?format=json${options.currentSummary ? "&summary=" + options.currentSummary : ""}">JSON</a>
+    </span>
+  </div>
   ${summarySection}
   ${entriesHtml}
+  <script>
+    function navigate() {
+      var cat = document.getElementById('sel-category').value;
+      var fmt = document.getElementById('sel-format').value;
+      var sum = document.getElementById('sel-summary').value;
+      var params = new URLSearchParams();
+      params.set('format', fmt);
+      params.set('date', '${options.currentDate}');
+      if (sum) params.set('summary', sum);
+      window.location.href = '/' + cat + '?' + params.toString();
+    }
+    document.getElementById('sel-category').addEventListener('change', navigate);
+    document.getElementById('sel-format').addEventListener('change', navigate);
+    document.getElementById('sel-summary').addEventListener('change', navigate);
+  </script>
 </body>
 </html>`;
 }
