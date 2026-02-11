@@ -81,7 +81,7 @@ app.get(
 
     if (format === "html") {
       return c.html(
-        renderHtmlPage(entries, category, displayDate, {
+        renderHtmlPage(summaryOnly ? [] : entries, category, displayDate, {
           summary: aiSummary,
           currentFormat: format,
           currentSummary: summaryParam,
