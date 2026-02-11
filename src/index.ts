@@ -4,7 +4,7 @@ import { zValidator } from "@hono/zod-validator";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { extractEntries } from "./entry-collector";
-import { fetchArticleContents } from "./article-fetcher";
+import { fetchArticleContents, type ArticleContent } from "./article-fetcher";
 import { generateFeed } from "./feed-generator";
 import { renderHtmlPage } from "./html-renderer";
 import { CATEGORIES, type AISummaryResult, type Env } from "./types";
@@ -22,6 +22,7 @@ const querySchema = z.object({
     .regex(/^\d{8}$/, "YYYYMMDD形式で指定してください")
     .optional(),
   summary: z.enum(["ai", "aiOnly"]).optional(),
+  revalidate: z.enum(["true", "1"]).optional(),
 });
 
 function getYesterdayJST(): string {
@@ -43,16 +44,34 @@ app.get("/", (c) => {
   return c.redirect("/all?format=html&summary=ai");
 });
 
+function buildCacheKey(baseUrl: string, category: string, dateParam: string, format: string, summaryParam?: string): string {
+  const url = new URL(`/${category}`, baseUrl);
+  url.searchParams.set("date", dateParam);
+  url.searchParams.set("format", format);
+  if (summaryParam) url.searchParams.set("summary", summaryParam);
+  return url.toString();
+}
+
 app.get(
   "/:category",
   zValidator("param", paramSchema),
   zValidator("query", querySchema),
   async (c) => {
     const { category } = c.req.valid("param");
-    const { format, date, summary: summaryParam } = c.req.valid("query");
+    const { format, date, summary: summaryParam, revalidate: revalidateParam } = c.req.valid("query");
     const dateParam = date || getYesterdayJST();
+    const revalidate = revalidateParam != null;
     const wantSummary = summaryParam === "ai" || summaryParam === "aiOnly";
     const summaryOnly = summaryParam === "aiOnly";
+
+    const baseUrl = new URL(c.req.url).origin;
+    const cacheKey = buildCacheKey(baseUrl, category, dateParam, format, summaryParam);
+    const cache = typeof caches !== "undefined" ? caches.default : null;
+
+    if (!revalidate && cache) {
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+    }
 
     const hatenaUrl = `https://b.hatena.ne.jp/hotentry/${category}/${dateParam}`;
     const res = await fetch(hatenaUrl);
@@ -68,7 +87,6 @@ app.get(
     }
 
     const displayDate = formatDateForDisplay(dateParam);
-    const baseUrl = new URL(c.req.url).origin;
 
     let aiSummary: AISummaryResult | undefined;
     if (wantSummary) {
@@ -79,8 +97,10 @@ app.get(
       aiSummary = await generateAISummary(c.env.GOOGLE_AI_API_KEY, articles);
     }
 
+    let response: Response;
+
     if (format === "html") {
-      return c.html(
+      response = c.html(
         renderHtmlPage(summaryOnly ? [] : entries, category, displayDate, {
           summary: aiSummary,
           currentFormat: format,
@@ -88,39 +108,50 @@ app.get(
           currentDate: dateParam,
         }),
       );
-    }
+    } else {
+      const feed = summaryOnly
+        ? generateFeed([], category, displayDate, baseUrl)
+        : generateFeed(entries, category, displayDate, baseUrl);
 
-    const feed = summaryOnly
-      ? generateFeed([], category, displayDate, baseUrl)
-      : generateFeed(entries, category, displayDate, baseUrl);
+      if (aiSummary) {
+        const summaryHtml = buildSummaryHtml(aiSummary);
+        feed.addItem({
+          title: `[要約] ${displayDate} の ${category} まとめ`,
+          id: `${baseUrl}/${category}/summary/${dateParam}`,
+          link: `${baseUrl}/${category}?format=html&summary=ai&date=${dateParam}`,
+          description: aiSummary.overview,
+          content: summaryHtml,
+          date: new Date(),
+        });
+      }
 
-    if (aiSummary) {
-      const summaryHtml = buildSummaryHtml(aiSummary);
-      feed.addItem({
-        title: `[要約] ${displayDate} の ${category} まとめ`,
-        id: `${baseUrl}/${category}/summary/${dateParam}`,
-        link: `${baseUrl}/${category}?format=html&summary=ai&date=${dateParam}`,
-        description: aiSummary.overview,
-        content: summaryHtml,
-        date: new Date(),
+      const contentTypeMap = {
+        rss: "application/rss+xml; charset=utf-8",
+        atom: "application/atom+xml; charset=utf-8",
+        json: "application/feed+json; charset=utf-8",
+      } as const;
+
+      const outputMap = {
+        rss: () => feed.rss2(),
+        atom: () => feed.atom1(),
+        json: () => feed.json1(),
+      } as const;
+
+      response = new Response(outputMap[format](), {
+        headers: { "Content-Type": contentTypeMap[format] },
       });
     }
 
-    const contentTypeMap = {
-      rss: "application/rss+xml; charset=utf-8",
-      atom: "application/atom+xml; charset=utf-8",
-      json: "application/feed+json; charset=utf-8",
-    } as const;
+    if (cache) {
+      const body = await response.clone().text();
+      const cacheResponse = new Response(body, {
+        status: response.status,
+        headers: { ...Object.fromEntries(response.headers.entries()), "Cache-Control": "public, max-age=3600" },
+      });
+      c.executionCtx.waitUntil(cache.put(cacheKey, cacheResponse));
+    }
 
-    const outputMap = {
-      rss: () => feed.rss2(),
-      atom: () => feed.atom1(),
-      json: () => feed.json1(),
-    } as const;
-
-    return new Response(outputMap[format](), {
-      headers: { "Content-Type": contentTypeMap[format] },
-    });
+    return response;
   },
 );
 

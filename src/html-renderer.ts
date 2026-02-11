@@ -88,6 +88,9 @@ export function renderHtmlPage(
     .feed-links { margin-left: auto; display: flex; gap: 0.5rem; }
     .feed-links a { font-size: 0.75rem; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.3rem 0.5rem; transition: border-color 0.15s, color 0.15s; }
     .feed-links a:hover { border-color: var(--accent); color: var(--accent); }
+    .revalidate-btn { font-family: var(--sans); font-size: 0.75rem; color: var(--ink-muted); background: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.3rem 0.5rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+    .revalidate-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .revalidate-btn.loading { opacity: 0.5; pointer-events: none; }
 
     .summary { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 1.5rem 1.75rem; margin-bottom: 2.5rem; }
     .summary-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.75rem; }
@@ -146,6 +149,7 @@ export function renderHtmlPage(
         <a href="/${category}?format=rss${options.currentSummary ? "&summary=" + options.currentSummary : ""}&date=${options.currentDate}">RSS</a>
         <a href="/${category}?format=atom${options.currentSummary ? "&summary=" + options.currentSummary : ""}&date=${options.currentDate}">Atom</a>
         <a href="/${category}?format=json${options.currentSummary ? "&summary=" + options.currentSummary : ""}&date=${options.currentDate}">JSON</a>
+        <button class="revalidate-btn" id="btn-revalidate" title="キャッシュを破棄して再取得">再取得</button>
       </span>
     </div>
     ${summarySection}
@@ -168,6 +172,14 @@ export function renderHtmlPage(
     document.getElementById('sel-category').addEventListener('change', navigate);
     document.getElementById('sel-format').addEventListener('change', navigate);
     document.getElementById('sel-summary').addEventListener('change', navigate);
+    document.getElementById('btn-revalidate').addEventListener('click', function() {
+      var btn = this;
+      btn.textContent = '取得中…';
+      btn.classList.add('loading');
+      var params = new URLSearchParams(window.location.search);
+      params.set('revalidate', 'true');
+      window.location.href = window.location.pathname + '?' + params.toString();
+    });
   </script>
 </body>
 </html>`;
