@@ -135,7 +135,7 @@ app.get(
           summary: aiSummary,
           currentFormat: format,
           currentSummary: summaryParam,
-          currentDate: dateParam,
+          currentDate: date ? dateParam : effectiveDate,
         }),
       );
     } else {
