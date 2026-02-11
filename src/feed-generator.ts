@@ -67,7 +67,10 @@ function buildContentEncoded(entry: HatenaEntry): string {
 function buildBookmarkCommentUrl(url: string): string {
   try {
     const u = new URL(url);
-    const path = u.protocol === "https:" ? `/entry/s/${u.host}${u.pathname}${u.search}` : `/entry/${u.host}${u.pathname}${u.search}`;
+    const path =
+      u.protocol === "https:"
+        ? `/entry/s/${u.host}${u.pathname}${u.search}`
+        : `/entry/${u.host}${u.pathname}${u.search}`;
     return `https://b.hatena.ne.jp${path}`;
   } catch {
     return `https://b.hatena.ne.jp/entry/${url}`;

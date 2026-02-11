@@ -7,7 +7,14 @@ import { extractEntries } from "./entry-collector";
 import { fetchArticleContents, type ArticleContent } from "./article-fetcher";
 import { generateFeed } from "./feed-generator";
 import { renderHtmlPage, renderErrorPage } from "./html-renderer";
-import { CATEGORIES, CATEGORY_LABELS, type AISummaryResult, type Category, type Env, type HatenaEntry } from "./types";
+import {
+  CATEGORIES,
+  CATEGORY_LABELS,
+  type AISummaryResult,
+  type Category,
+  type Env,
+  type HatenaEntry,
+} from "./types";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -73,7 +80,13 @@ async function fetchHatenaEntries(
   return { entries: null, resolvedDate: dateParam };
 }
 
-function buildCacheKey(baseUrl: string, category: string, dateParam: string, format: string, summaryParam?: string): string {
+function buildCacheKey(
+  baseUrl: string,
+  category: string,
+  dateParam: string,
+  format: string,
+  summaryParam?: string,
+): string {
   const url = new URL(`/${category}`, baseUrl);
   url.searchParams.set("date", dateParam);
   url.searchParams.set("format", format);
@@ -87,7 +100,12 @@ app.get(
   zValidator("query", querySchema),
   async (c) => {
     const { category } = c.req.valid("param");
-    const { format, date, summary: summaryParam, revalidate: revalidateParam } = c.req.valid("query");
+    const {
+      format,
+      date,
+      summary: summaryParam,
+      revalidate: revalidateParam,
+    } = c.req.valid("query");
     const dateParam = date || getYesterdayJST();
     const revalidate = revalidateParam != null;
     const wantSummary = summaryParam === "ai" || summaryParam === "aiOnly";
@@ -182,7 +200,10 @@ app.get(
       const body = await response.clone().text();
       const cacheResponse = new Response(body, {
         status: response.status,
-        headers: { ...Object.fromEntries(response.headers.entries()), "Cache-Control": "public, max-age=3600" },
+        headers: {
+          ...Object.fromEntries(response.headers.entries()),
+          "Cache-Control": "public, max-age=3600",
+        },
       });
       c.executionCtx.waitUntil(cache.put(cacheKey, cacheResponse));
     }
@@ -221,9 +242,10 @@ function buildErrorResponse(
     date: new Date(),
   });
 
-  const contentType = format === "atom"
-    ? "application/atom+xml; charset=utf-8"
-    : "application/rss+xml; charset=utf-8";
+  const contentType =
+    format === "atom"
+      ? "application/atom+xml; charset=utf-8"
+      : "application/rss+xml; charset=utf-8";
   const output = format === "atom" ? feed.atom1() : feed.rss2();
 
   return new Response(output, { status, headers: { "Content-Type": contentType } });
@@ -240,7 +262,10 @@ const aiSummarySchema = z.object({
   ),
 });
 
-async function generateAISummary(apiKey: string, articles: ArticleContent[]): Promise<AISummaryResult> {
+async function generateAISummary(
+  apiKey: string,
+  articles: ArticleContent[],
+): Promise<AISummaryResult> {
   const articleTexts = articles
     .slice(0, 20)
     .map(

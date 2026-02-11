@@ -12,7 +12,10 @@ interface BrowserRenderingConfig {
   apiToken: string;
 }
 
-async function fetchMarkdownViaRendering(url: string, config: BrowserRenderingConfig): Promise<string> {
+async function fetchMarkdownViaRendering(
+  url: string,
+  config: BrowserRenderingConfig,
+): Promise<string> {
   const res = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${config.accountId}/browser-rendering/markdown`,
     {

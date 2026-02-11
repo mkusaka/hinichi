@@ -35,11 +35,15 @@ export function renderHtmlPage(
     .join("\n");
 
   const categoryOptions = CATEGORIES.map(
-    (c) => `<option value="${c}"${c === category ? " selected" : ""}>${esc(CATEGORY_LABELS[c])}</option>`,
+    (c) =>
+      `<option value="${c}"${c === category ? " selected" : ""}>${esc(CATEGORY_LABELS[c])}</option>`,
   ).join("\n        ");
 
   const formatOptions = ["html", "rss", "atom", "json"]
-    .map((f) => `<option value="${f}"${f === options.currentFormat ? " selected" : ""}>${f.toUpperCase()}</option>`)
+    .map(
+      (f) =>
+        `<option value="${f}"${f === options.currentFormat ? " selected" : ""}>${f.toUpperCase()}</option>`,
+    )
     .join("\n        ");
 
   const summaryOptions = [
@@ -47,7 +51,10 @@ export function renderHtmlPage(
     { value: "ai", label: "要約付き" },
     { value: "aiOnly", label: "要約のみ" },
   ]
-    .map((s) => `<option value="${s.value}"${s.value === (options.currentSummary || "") ? " selected" : ""}>${s.label}</option>`)
+    .map(
+      (s) =>
+        `<option value="${s.value}"${s.value === (options.currentSummary || "") ? " selected" : ""}>${s.label}</option>`,
+    )
     .join("\n        ");
 
   return `<!DOCTYPE html>

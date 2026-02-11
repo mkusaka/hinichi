@@ -155,7 +155,18 @@ describe("GET /:category", () => {
   });
 
   it("supports all valid categories", async () => {
-    const categories = ["all", "general", "social", "economics", "life", "knowledge", "it", "fun", "entertainment", "game"];
+    const categories = [
+      "all",
+      "general",
+      "social",
+      "economics",
+      "life",
+      "knowledge",
+      "it",
+      "fun",
+      "entertainment",
+      "game",
+    ];
 
     for (const cat of categories) {
       fetchMock
