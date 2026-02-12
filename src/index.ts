@@ -17,6 +17,18 @@ import {
 } from "./types";
 
 const app = new Hono<{ Bindings: Env }>();
+const CACHE_TTL_SECONDS = 7 * 24 * 60 * 60;
+const CACHE_HEADERS_TO_STRIP = [
+  "cache-control",
+  "age",
+  "expires",
+  "last-modified",
+  "etag",
+] as const;
+const DATA_CACHE_VERSION = "1";
+const ENTRY_LOOKBACK_DAYS = 2;
+
+type DataCacheKind = "entries" | "articles" | "ai-summary";
 
 const paramSchema = z.object({
   category: z.enum(CATEGORIES),
@@ -94,6 +106,60 @@ function buildCacheKey(
   return url.toString();
 }
 
+function buildDataCacheKey(
+  baseUrl: string,
+  kind: DataCacheKind,
+  category: string,
+  dateParam: string,
+): string {
+  const url = new URL(`/__cache/${kind}`, baseUrl);
+  url.searchParams.set("category", category);
+  url.searchParams.set("date", dateParam);
+  url.searchParams.set("v", DATA_CACHE_VERSION);
+  return url.toString();
+}
+
+function buildCacheControlHeader(): string {
+  return `public, max-age=${CACHE_TTL_SECONDS}`;
+}
+
+function buildJsonCacheResponse(payload: unknown): Response {
+  return new Response(JSON.stringify(payload), {
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": buildCacheControlHeader(),
+    },
+  });
+}
+
+function resolveLookupDates(dateParam: string, allowRetry: boolean): string[] {
+  if (!allowRetry) return [dateParam];
+  return Array.from({ length: ENTRY_LOOKBACK_DAYS + 1 }, (_, i) => subtractDays(dateParam, i));
+}
+
+async function matchJsonCache<T>(cache: Cache, cacheKey: string): Promise<T | null> {
+  const cached = await cache.match(cacheKey);
+  if (!cached) return null;
+  try {
+    return (await cached.json()) as T;
+  } catch {
+    await cache.delete(cacheKey);
+    return null;
+  }
+}
+
+function buildClientResponseWithoutCacheHeaders(source: Response): Response {
+  const headers = new Headers(source.headers);
+  for (const headerName of CACHE_HEADERS_TO_STRIP) {
+    headers.delete(headerName);
+  }
+  return new Response(source.body, {
+    status: source.status,
+    statusText: source.statusText,
+    headers,
+  });
+}
+
 interface ErrorResponseOptions {
   details?: string[];
   linkHref?: string;
@@ -152,15 +218,36 @@ app.get(
 
     const baseUrl = new URL(c.req.url).origin;
     const cache = typeof caches !== "undefined" ? caches.default : null;
+    const allowRetry = !date;
 
     if (date && cache && !revalidate) {
       const cacheKey = buildCacheKey(baseUrl, category, dateParam, format, summaryParam);
       const cached = await cache.match(cacheKey);
-      if (cached) return cached;
+      if (cached) return buildClientResponseWithoutCacheHeaders(cached);
     }
 
-    const { entries, resolvedDate } = await fetchHatenaEntries(category, dateParam, !date);
-    const effectiveDate = resolvedDate || dateParam;
+    let entries: HatenaEntry[] | null = null;
+    let effectiveDate = dateParam;
+    let entriesFromCache = false;
+
+    if (cache && !revalidate) {
+      for (const lookupDate of resolveLookupDates(dateParam, allowRetry)) {
+        const entriesCacheKey = buildDataCacheKey(baseUrl, "entries", category, lookupDate);
+        const cachedEntries = await matchJsonCache<HatenaEntry[]>(cache, entriesCacheKey);
+        if (!Array.isArray(cachedEntries) || cachedEntries.length === 0) continue;
+        entries = cachedEntries;
+        effectiveDate = lookupDate;
+        entriesFromCache = true;
+        break;
+      }
+    }
+
+    if (!entries) {
+      const fetched = await fetchHatenaEntries(category, dateParam, allowRetry);
+      entries = fetched.entries;
+      effectiveDate = fetched.resolvedDate || dateParam;
+    }
+
     const displayDate = formatDateForDisplay(effectiveDate);
 
     if (!entries || entries.length === 0) {
@@ -171,23 +258,72 @@ app.get(
     }
 
     const cacheKey = buildCacheKey(baseUrl, category, effectiveDate, format, summaryParam);
+    const entriesCacheKey = buildDataCacheKey(baseUrl, "entries", category, effectiveDate);
+    const articlesCacheKey = buildDataCacheKey(baseUrl, "articles", category, effectiveDate);
+    const aiSummaryCacheKey = buildDataCacheKey(baseUrl, "ai-summary", category, effectiveDate);
 
     if (cache && !revalidate) {
       const cached = await cache.match(cacheKey);
-      if (cached) return cached;
+      if (cached) return buildClientResponseWithoutCacheHeaders(cached);
     }
 
     if (cache && revalidate) {
-      await cache.delete(cacheKey);
+      await Promise.all([
+        cache.delete(cacheKey),
+        cache.delete(entriesCacheKey),
+        cache.delete(articlesCacheKey),
+        cache.delete(aiSummaryCacheKey),
+      ]);
+    }
+
+    if (cache && (!entriesFromCache || revalidate)) {
+      c.executionCtx.waitUntil(cache.put(entriesCacheKey, buildJsonCacheResponse(entries)));
     }
 
     let aiSummary: AISummaryResult | undefined;
     if (wantSummary) {
-      const articles = await fetchArticleContents(entries, {
-        accountId: c.env.BROWSER_RENDERING_ACCOUNT_ID,
-        apiToken: c.env.BROWSER_RENDERING_API_TOKEN,
-      });
-      aiSummary = await generateAISummary(c.env.GOOGLE_AI_API_KEY, articles);
+      let articles: ArticleContent[] | null = null;
+      let articlesFromCache = false;
+      if (cache && !revalidate) {
+        const cachedArticles = await matchJsonCache<ArticleContent[]>(cache, articlesCacheKey);
+        if (Array.isArray(cachedArticles) && cachedArticles.length > 0) {
+          articles = cachedArticles;
+          articlesFromCache = true;
+        }
+      }
+
+      if (!articles) {
+        articles = await fetchArticleContents(entries, {
+          accountId: c.env.BROWSER_RENDERING_ACCOUNT_ID,
+          apiToken: c.env.BROWSER_RENDERING_API_TOKEN,
+        });
+      }
+
+      if (cache && (!articlesFromCache || revalidate)) {
+        c.executionCtx.waitUntil(cache.put(articlesCacheKey, buildJsonCacheResponse(articles)));
+      }
+
+      let aiSummaryFromCache = false;
+      if (cache && !revalidate) {
+        const cachedSummary = await matchJsonCache<unknown>(cache, aiSummaryCacheKey);
+        if (cachedSummary) {
+          const parsedSummary = aiSummarySchema.safeParse(cachedSummary);
+          if (parsedSummary.success) {
+            aiSummary = parsedSummary.data;
+            aiSummaryFromCache = true;
+          } else {
+            await cache.delete(aiSummaryCacheKey);
+          }
+        }
+      }
+
+      if (!aiSummary) {
+        aiSummary = await generateAISummary(c.env.GOOGLE_AI_API_KEY, articles);
+      }
+
+      if (cache && (!aiSummaryFromCache || revalidate)) {
+        c.executionCtx.waitUntil(cache.put(aiSummaryCacheKey, buildJsonCacheResponse(aiSummary)));
+      }
     }
 
     let response: Response;
@@ -241,7 +377,7 @@ app.get(
         status: response.status,
         headers: {
           ...Object.fromEntries(response.headers.entries()),
-          "Cache-Control": "public, max-age=3600",
+          "Cache-Control": buildCacheControlHeader(),
         },
       });
       c.executionCtx.waitUntil(cache.put(cacheKey, cacheResponse));

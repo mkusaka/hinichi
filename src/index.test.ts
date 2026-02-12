@@ -213,6 +213,42 @@ describe("GET /:category", () => {
     expect(res.status).toBe(200);
   });
 
+  it("reuses cached entry payload across formats for the same date", async () => {
+    fetchMock
+      .get("https://b.hatena.ne.jp")
+      .intercept({ path: "/hotentry/it/20260210" })
+      .reply(200, SAMPLE_HTML, { headers: { "content-type": "text/html" } });
+
+    const rss = await SELF.fetch("http://localhost/it?format=rss&date=20260210");
+    expect(rss.status).toBe(200);
+
+    const atom = await SELF.fetch("http://localhost/it?format=atom&date=20260210");
+    expect(atom.status).toBe(200);
+  });
+
+  it("does not expose cache headers to clients for cached responses", async () => {
+    fetchMock
+      .get("https://b.hatena.ne.jp")
+      .intercept({ path: "/hotentry/it/20260210" })
+      .reply(200, SAMPLE_HTML, { headers: { "content-type": "text/html" } });
+
+    const first = await SELF.fetch("http://localhost/it?format=atom&date=20260210");
+    expect(first.status).toBe(200);
+    expect(first.headers.get("cache-control")).toBeNull();
+    expect(first.headers.get("age")).toBeNull();
+    expect(first.headers.get("expires")).toBeNull();
+    expect(first.headers.get("last-modified")).toBeNull();
+    expect(first.headers.get("etag")).toBeNull();
+
+    const second = await SELF.fetch("http://localhost/it?format=atom&date=20260210");
+    expect(second.status).toBe(200);
+    expect(second.headers.get("cache-control")).toBeNull();
+    expect(second.headers.get("age")).toBeNull();
+    expect(second.headers.get("expires")).toBeNull();
+    expect(second.headers.get("last-modified")).toBeNull();
+    expect(second.headers.get("etag")).toBeNull();
+  });
+
   it("redirects root to /all with default params", async () => {
     const res = await SELF.fetch("http://localhost/", { redirect: "manual" });
     expect(res.status).toBe(302);
