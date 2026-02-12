@@ -18,7 +18,13 @@ import {
 
 const app = new Hono<{ Bindings: Env }>();
 const CACHE_TTL_SECONDS = 7 * 24 * 60 * 60;
-const CACHE_HEADERS_TO_STRIP = ["cache-control", "age", "expires", "last-modified", "etag"] as const;
+const CACHE_HEADERS_TO_STRIP = [
+  "cache-control",
+  "age",
+  "expires",
+  "last-modified",
+  "etag",
+] as const;
 const DATA_CACHE_VERSION = "1";
 const ENTRY_LOOKBACK_DAYS = 2;
 
