@@ -346,8 +346,8 @@ app.get(
         const summaryHtml = buildSummaryHtml(aiSummary);
         feed.addItem({
           title: `[要約] ${displayDate} の ${category} まとめ`,
-          id: `${baseUrl}/${category}/summary/${dateParam}`,
-          link: `${baseUrl}/${category}?format=html&summary=ai&date=${dateParam}`,
+          id: `${baseUrl}/${category}/summary/${effectiveDate}`,
+          link: `${baseUrl}/${category}?format=html&summary=ai&date=${effectiveDate}`,
           description: aiSummary.overview,
           content: summaryHtml,
           date: new Date(),
