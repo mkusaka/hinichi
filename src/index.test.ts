@@ -203,14 +203,13 @@ describe("GET /:category", () => {
     }
   });
 
-  it("accepts revalidate parameter", async () => {
-    fetchMock
-      .get("https://b.hatena.ne.jp")
-      .intercept({ path: "/hotentry/it/20260210" })
-      .reply(200, SAMPLE_HTML, { headers: { "content-type": "text/html" } });
-
-    const res = await SELF.fetch("http://localhost/it?format=rss&date=20260210&revalidate=true");
-    expect(res.status).toBe(200);
+  it("revalidate parameter clears cache and redirects without it", async () => {
+    const res = await SELF.fetch("http://localhost/it?format=rss&date=20260210&revalidate=true", {
+      redirect: "manual",
+    });
+    expect(res.status).toBe(302);
+    const location = res.headers.get("Location");
+    expect(location).toBe("/it?format=rss&date=20260210");
   });
 
   it("reuses cached entry payload across formats for the same date", async () => {
