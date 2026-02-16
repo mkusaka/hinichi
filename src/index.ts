@@ -267,7 +267,24 @@ app.get(
     const dataCache = createDataCache(kv, cache, baseUrl);
     const allowRetry = !date;
 
-    if (date && cache && !revalidate) {
+    if (revalidate) {
+      const lookupDates = resolveLookupDates(dateParam, allowRetry);
+      await Promise.all(
+        lookupDates.flatMap((d) => [
+          dataCache.delete("entries", category, d),
+          dataCache.delete("articles", category, d),
+          dataCache.delete("ai-summary", category, d),
+          ...(cache
+            ? [cache.delete(buildCacheKey(baseUrl, category, d, format, summaryParam))]
+            : []),
+        ]),
+      );
+      const redirectUrl = new URL(c.req.url);
+      redirectUrl.searchParams.delete("revalidate");
+      return c.redirect(redirectUrl.pathname + redirectUrl.search, 302);
+    }
+
+    if (date && cache) {
       const cacheKey = buildCacheKey(baseUrl, category, dateParam, format, summaryParam);
       const cached = await cache.match(cacheKey);
       if (cached) return buildClientResponseWithoutCacheHeaders(cached);
@@ -277,15 +294,13 @@ app.get(
     let effectiveDate = dateParam;
     let entriesFromCache = false;
 
-    if (!revalidate) {
-      for (const lookupDate of resolveLookupDates(dateParam, allowRetry)) {
-        const cached = await dataCache.get<HatenaEntry[]>("entries", category, lookupDate);
-        if (Array.isArray(cached) && cached.length > 0) {
-          entries = cached;
-          effectiveDate = lookupDate;
-          entriesFromCache = true;
-          break;
-        }
+    for (const lookupDate of resolveLookupDates(dateParam, allowRetry)) {
+      const cached = await dataCache.get<HatenaEntry[]>("entries", category, lookupDate);
+      if (Array.isArray(cached) && cached.length > 0) {
+        entries = cached;
+        effectiveDate = lookupDate;
+        entriesFromCache = true;
+        break;
       }
     }
 
@@ -306,21 +321,12 @@ app.get(
 
     const cacheKey = buildCacheKey(baseUrl, category, effectiveDate, format, summaryParam);
 
-    if (cache && !revalidate) {
+    if (cache) {
       const cached = await cache.match(cacheKey);
       if (cached) return buildClientResponseWithoutCacheHeaders(cached);
     }
 
-    if (revalidate) {
-      await Promise.all([
-        dataCache.delete("entries", category, effectiveDate),
-        dataCache.delete("articles", category, effectiveDate),
-        dataCache.delete("ai-summary", category, effectiveDate),
-        ...(cache ? [cache.delete(cacheKey)] : []),
-      ]);
-    }
-
-    if (!entriesFromCache || revalidate) {
+    if (!entriesFromCache) {
       c.executionCtx.waitUntil(dataCache.put("entries", category, effectiveDate, entries));
     }
 
@@ -329,12 +335,10 @@ app.get(
       let articles: ArticleContent[] | null = null;
       let articlesFromCache = false;
 
-      if (!revalidate) {
-        const cached = await dataCache.get<ArticleContent[]>("articles", category, effectiveDate);
-        if (Array.isArray(cached) && cached.length > 0) {
-          articles = cached;
-          articlesFromCache = true;
-        }
+      const cached = await dataCache.get<ArticleContent[]>("articles", category, effectiveDate);
+      if (Array.isArray(cached) && cached.length > 0) {
+        articles = cached;
+        articlesFromCache = true;
       }
 
       if (!articles) {
@@ -344,21 +348,19 @@ app.get(
         });
       }
 
-      if (!articlesFromCache || revalidate) {
+      if (!articlesFromCache) {
         c.executionCtx.waitUntil(dataCache.put("articles", category, effectiveDate, articles));
       }
 
       let aiSummaryFromCache = false;
-      if (!revalidate) {
-        const cached = await dataCache.get<unknown>("ai-summary", category, effectiveDate);
-        if (cached) {
-          const parsed = aiSummarySchema.safeParse(cached);
-          if (parsed.success) {
-            aiSummary = parsed.data;
-            aiSummaryFromCache = true;
-          } else {
-            c.executionCtx.waitUntil(dataCache.delete("ai-summary", category, effectiveDate));
-          }
+      const cachedSummary = await dataCache.get<unknown>("ai-summary", category, effectiveDate);
+      if (cachedSummary) {
+        const parsed = aiSummarySchema.safeParse(cachedSummary);
+        if (parsed.success) {
+          aiSummary = parsed.data;
+          aiSummaryFromCache = true;
+        } else {
+          c.executionCtx.waitUntil(dataCache.delete("ai-summary", category, effectiveDate));
         }
       }
 
@@ -366,7 +368,7 @@ app.get(
         aiSummary = await generateAISummary(c.env.GOOGLE_AI_API_KEY, articles, displayDate);
       }
 
-      if (!aiSummaryFromCache || revalidate) {
+      if (!aiSummaryFromCache) {
         c.executionCtx.waitUntil(dataCache.put("ai-summary", category, effectiveDate, aiSummary));
       }
     }
