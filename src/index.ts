@@ -129,11 +129,7 @@ interface DataCache {
   delete(kind: DataCacheKind, category: string, date: string): Promise<void>;
 }
 
-function createDataCache(
-  kv: KVNamespace | null,
-  cache: Cache | null,
-  baseUrl: string,
-): DataCache {
+function createDataCache(kv: KVNamespace | null, cache: Cache | null, baseUrl: string): DataCache {
   return {
     async get<T>(kind: DataCacheKind, category: string, date: string): Promise<T | null> {
       if (kv) {
