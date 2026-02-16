@@ -495,7 +495,11 @@ function buildErrorResponse(
 }
 
 const aiSummarySchema = z.object({
-  overview: z.string().describe("全記事を俯瞰した日本語のトレンドまとめ（3-5文）"),
+  overview: z
+    .string()
+    .describe(
+      "全記事を俯瞰した日本語の概要（3-5文。共通するテーマがあればまとめ、なければジャンルごとに簡潔に紹介する。「○月のトレンド」のような断定的なフレーミングは避ける）",
+    ),
   articles: z.array(
     z.object({
       title: z.string().describe("記事タイトル"),
@@ -523,7 +527,7 @@ async function generateAISummary(
 ${articleTexts}
 
 上記の記事群について:
-- overviewは全記事を俯瞰した日本語のトレンドまとめ（3-5文）
+- overviewは全記事を俯瞰した日本語の概要（3-5文）。共通するテーマがあればまとめ、なければジャンルごとに簡潔に紹介する。これらは単にその日の人気記事であり、必ずしも一つのトレンドを示すものではないため、「○月のトレンドは〜」のような断定的なフレーミングは避けること
 - articlesは全記事分生成すること
 - summaryは記事の本文内容に基づく具体的な要約（タイトルの繰り返しではなく、1-2文）`;
 
