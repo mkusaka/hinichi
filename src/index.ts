@@ -25,7 +25,7 @@ const CACHE_HEADERS_TO_STRIP = [
   "last-modified",
   "etag",
 ] as const;
-const DATA_CACHE_VERSION = "1";
+const DATA_CACHE_VERSION = "2";
 const ENTRY_LOOKBACK_DAYS = 2;
 
 type DataCacheKind = "entries" | "articles" | "ai-summary";
@@ -117,6 +117,55 @@ function buildDataCacheKey(
   url.searchParams.set("date", dateParam);
   url.searchParams.set("v", DATA_CACHE_VERSION);
   return url.toString();
+}
+
+function buildKvKey(kind: DataCacheKind, category: string, date: string): string {
+  return `v${DATA_CACHE_VERSION}:${kind}:${category}:${date}`;
+}
+
+interface DataCache {
+  get<T>(kind: DataCacheKind, category: string, date: string): Promise<T | null>;
+  put(kind: DataCacheKind, category: string, date: string, value: unknown): Promise<void>;
+  delete(kind: DataCacheKind, category: string, date: string): Promise<void>;
+}
+
+function createDataCache(
+  kv: KVNamespace | null,
+  cache: Cache | null,
+  baseUrl: string,
+): DataCache {
+  return {
+    async get<T>(kind: DataCacheKind, category: string, date: string): Promise<T | null> {
+      if (kv) {
+        return kv.get<T>(buildKvKey(kind, category, date), "json");
+      }
+      if (cache) {
+        return matchJsonCache<T>(cache, buildDataCacheKey(baseUrl, kind, category, date));
+      }
+      return null;
+    },
+    put(kind: DataCacheKind, category: string, date: string, value: unknown): Promise<void> {
+      if (kv) {
+        return kv.put(buildKvKey(kind, category, date), JSON.stringify(value), {
+          expirationTtl: CACHE_TTL_SECONDS,
+        });
+      }
+      if (cache) {
+        return cache.put(
+          buildDataCacheKey(baseUrl, kind, category, date),
+          buildJsonCacheResponse(value),
+        );
+      }
+      return Promise.resolve();
+    },
+    async delete(kind: DataCacheKind, category: string, date: string): Promise<void> {
+      if (kv) {
+        await kv.delete(buildKvKey(kind, category, date));
+      } else if (cache) {
+        await cache.delete(buildDataCacheKey(baseUrl, kind, category, date));
+      }
+    },
+  };
 }
 
 function buildCacheControlHeader(): string {
@@ -218,6 +267,8 @@ app.get(
 
     const baseUrl = new URL(c.req.url).origin;
     const cache = typeof caches !== "undefined" ? caches.default : null;
+    const kv = c.env.CACHE_KV ?? null;
+    const dataCache = createDataCache(kv, cache, baseUrl);
     const allowRetry = !date;
 
     if (date && cache && !revalidate) {
@@ -230,15 +281,15 @@ app.get(
     let effectiveDate = dateParam;
     let entriesFromCache = false;
 
-    if (cache && !revalidate) {
+    if (!revalidate) {
       for (const lookupDate of resolveLookupDates(dateParam, allowRetry)) {
-        const entriesCacheKey = buildDataCacheKey(baseUrl, "entries", category, lookupDate);
-        const cachedEntries = await matchJsonCache<HatenaEntry[]>(cache, entriesCacheKey);
-        if (!Array.isArray(cachedEntries) || cachedEntries.length === 0) continue;
-        entries = cachedEntries;
-        effectiveDate = lookupDate;
-        entriesFromCache = true;
-        break;
+        const cached = await dataCache.get<HatenaEntry[]>("entries", category, lookupDate);
+        if (Array.isArray(cached) && cached.length > 0) {
+          entries = cached;
+          effectiveDate = lookupDate;
+          entriesFromCache = true;
+          break;
+        }
       }
     }
 
@@ -258,36 +309,34 @@ app.get(
     }
 
     const cacheKey = buildCacheKey(baseUrl, category, effectiveDate, format, summaryParam);
-    const entriesCacheKey = buildDataCacheKey(baseUrl, "entries", category, effectiveDate);
-    const articlesCacheKey = buildDataCacheKey(baseUrl, "articles", category, effectiveDate);
-    const aiSummaryCacheKey = buildDataCacheKey(baseUrl, "ai-summary", category, effectiveDate);
 
     if (cache && !revalidate) {
       const cached = await cache.match(cacheKey);
       if (cached) return buildClientResponseWithoutCacheHeaders(cached);
     }
 
-    if (cache && revalidate) {
+    if (revalidate) {
       await Promise.all([
-        cache.delete(cacheKey),
-        cache.delete(entriesCacheKey),
-        cache.delete(articlesCacheKey),
-        cache.delete(aiSummaryCacheKey),
+        dataCache.delete("entries", category, effectiveDate),
+        dataCache.delete("articles", category, effectiveDate),
+        dataCache.delete("ai-summary", category, effectiveDate),
+        ...(cache ? [cache.delete(cacheKey)] : []),
       ]);
     }
 
-    if (cache && (!entriesFromCache || revalidate)) {
-      c.executionCtx.waitUntil(cache.put(entriesCacheKey, buildJsonCacheResponse(entries)));
+    if (!entriesFromCache || revalidate) {
+      c.executionCtx.waitUntil(dataCache.put("entries", category, effectiveDate, entries));
     }
 
     let aiSummary: AISummaryResult | undefined;
     if (wantSummary) {
       let articles: ArticleContent[] | null = null;
       let articlesFromCache = false;
-      if (cache && !revalidate) {
-        const cachedArticles = await matchJsonCache<ArticleContent[]>(cache, articlesCacheKey);
-        if (Array.isArray(cachedArticles) && cachedArticles.length > 0) {
-          articles = cachedArticles;
+
+      if (!revalidate) {
+        const cached = await dataCache.get<ArticleContent[]>("articles", category, effectiveDate);
+        if (Array.isArray(cached) && cached.length > 0) {
+          articles = cached;
           articlesFromCache = true;
         }
       }
@@ -299,20 +348,20 @@ app.get(
         });
       }
 
-      if (cache && (!articlesFromCache || revalidate)) {
-        c.executionCtx.waitUntil(cache.put(articlesCacheKey, buildJsonCacheResponse(articles)));
+      if (!articlesFromCache || revalidate) {
+        c.executionCtx.waitUntil(dataCache.put("articles", category, effectiveDate, articles));
       }
 
       let aiSummaryFromCache = false;
-      if (cache && !revalidate) {
-        const cachedSummary = await matchJsonCache<unknown>(cache, aiSummaryCacheKey);
-        if (cachedSummary) {
-          const parsedSummary = aiSummarySchema.safeParse(cachedSummary);
-          if (parsedSummary.success) {
-            aiSummary = parsedSummary.data;
+      if (!revalidate) {
+        const cached = await dataCache.get<unknown>("ai-summary", category, effectiveDate);
+        if (cached) {
+          const parsed = aiSummarySchema.safeParse(cached);
+          if (parsed.success) {
+            aiSummary = parsed.data;
             aiSummaryFromCache = true;
           } else {
-            await cache.delete(aiSummaryCacheKey);
+            c.executionCtx.waitUntil(dataCache.delete("ai-summary", category, effectiveDate));
           }
         }
       }
@@ -321,8 +370,8 @@ app.get(
         aiSummary = await generateAISummary(c.env.GOOGLE_AI_API_KEY, articles, displayDate);
       }
 
-      if (cache && (!aiSummaryFromCache || revalidate)) {
-        c.executionCtx.waitUntil(cache.put(aiSummaryCacheKey, buildJsonCacheResponse(aiSummary)));
+      if (!aiSummaryFromCache || revalidate) {
+        c.executionCtx.waitUntil(dataCache.put("ai-summary", category, effectiveDate, aiSummary));
       }
     }
 
