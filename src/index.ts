@@ -495,7 +495,11 @@ function buildErrorResponse(
 }
 
 const aiSummarySchema = z.object({
-  overview: z.string().describe("全記事を俯瞰した日本語の概要（3-5文。共通するテーマがあればまとめ、なければジャンルごとに簡潔に紹介する。「○月のトレンド」のような断定的なフレーミングは避ける）"),
+  overview: z
+    .string()
+    .describe(
+      "全記事を俯瞰した日本語の概要（3-5文。共通するテーマがあればまとめ、なければジャンルごとに簡潔に紹介する。「○月のトレンド」のような断定的なフレーミングは避ける）",
+    ),
   articles: z.array(
     z.object({
       title: z.string().describe("記事タイトル"),
