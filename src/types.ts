@@ -44,6 +44,7 @@ export interface Env {
   GOOGLE_AI_API_KEY: string;
   BROWSER_RENDERING_ACCOUNT_ID: string;
   BROWSER_RENDERING_API_TOKEN: string;
+  CACHE_KV?: KVNamespace;
 }
 
 export interface ArticleSummary {
