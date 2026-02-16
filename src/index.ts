@@ -318,7 +318,7 @@ app.get(
       }
 
       if (!aiSummary) {
-        aiSummary = await generateAISummary(c.env.GOOGLE_AI_API_KEY, articles);
+        aiSummary = await generateAISummary(c.env.GOOGLE_AI_API_KEY, articles, displayDate);
       }
 
       if (cache && (!aiSummaryFromCache || revalidate)) {
@@ -463,6 +463,7 @@ const aiSummarySchema = z.object({
 async function generateAISummary(
   apiKey: string,
   articles: ArticleContent[],
+  dateStr: string,
 ): Promise<AISummaryResult> {
   const articleTexts = articles
     .slice(0, 20)
@@ -472,7 +473,7 @@ async function generateAISummary(
     )
     .join("\n\n");
 
-  const prompt = `以下ははてなブックマークの人気エントリー一覧とその本文抜粋です。
+  const prompt = `今日は${dateStr}です。以下ははてなブックマークの人気エントリー一覧とその本文抜粋です。
 
 ${articleTexts}
 
