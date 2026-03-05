@@ -29,13 +29,13 @@ importers:
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: 1.25.6
-        version: 1.25.6(vite@7.3.1)(workerd@1.20260305.0)(wrangler@4.69.0(@cloudflare/workers-types@4.20260301.1))
+        version: 1.25.6(vite@7.3.1)(workerd@1.20260305.0)(wrangler@4.69.0(@cloudflare/workers-types@4.20260305.0))
       '@cloudflare/vitest-pool-workers':
         specifier: 0.12.18
-        version: 0.12.18(@cloudflare/workers-types@4.20260301.1)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4)
+        version: 0.12.18(@cloudflare/workers-types@4.20260305.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4)
       '@cloudflare/workers-types':
-        specifier: 4.20260301.1
-        version: 4.20260301.1
+        specifier: 4.20260305.0
+        version: 4.20260305.0
       '@vitest/runner':
         specifier: 3.2.4
         version: 3.2.4
@@ -59,7 +59,7 @@ importers:
         version: 3.2.4
       wrangler:
         specifier: 4.69.0
-        version: 4.69.0(@cloudflare/workers-types@4.20260301.1)
+        version: 4.69.0(@cloudflare/workers-types@4.20260305.0)
 
 packages:
 
@@ -141,8 +141,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20260301.1':
-    resolution: {integrity: sha512-klKnECMb5A4GtVF0P5NH6rCjtyjqIEKJaz6kEtx9YPHhfFO2HUEarO+MI4F8WPchgeZqpGlEpDhRapzrOTw51Q==}
+  '@cloudflare/workers-types@4.20260305.0':
+    resolution: {integrity: sha512-sCgPFnQ03SVpC2OVW8wysONLZW/A8hlp9Mq2ckG/h1oId4kr9NawA6vUiOmOjCWRn2hIohejBYVQ+Vu20rCdKA==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -1312,20 +1312,20 @@ snapshots:
     optionalDependencies:
       workerd: 1.20260305.0
 
-  '@cloudflare/vite-plugin@1.25.6(vite@7.3.1)(workerd@1.20260305.0)(wrangler@4.69.0(@cloudflare/workers-types@4.20260301.1))':
+  '@cloudflare/vite-plugin@1.25.6(vite@7.3.1)(workerd@1.20260305.0)(wrangler@4.69.0(@cloudflare/workers-types@4.20260305.0))':
     dependencies:
       '@cloudflare/unenv-preset': 2.14.0(unenv@2.0.0-rc.24)(workerd@1.20260305.0)
       miniflare: 4.20260305.0
       unenv: 2.0.0-rc.24
       vite: 7.3.1
-      wrangler: 4.69.0(@cloudflare/workers-types@4.20260301.1)
+      wrangler: 4.69.0(@cloudflare/workers-types@4.20260305.0)
       ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
       - workerd
 
-  '@cloudflare/vitest-pool-workers@0.12.18(@cloudflare/workers-types@4.20260301.1)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4)':
+  '@cloudflare/vitest-pool-workers@0.12.18(@cloudflare/workers-types@4.20260305.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4)':
     dependencies:
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
@@ -1333,7 +1333,7 @@ snapshots:
       esbuild: 0.27.3
       miniflare: 4.20260305.0
       vitest: 3.2.4
-      wrangler: 4.69.0(@cloudflare/workers-types@4.20260301.1)
+      wrangler: 4.69.0(@cloudflare/workers-types@4.20260305.0)
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
       - bufferutil
@@ -1354,7 +1354,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260305.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20260301.1': {}
+  '@cloudflare/workers-types@4.20260305.0': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -2187,7 +2187,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260305.0
       '@cloudflare/workerd-windows-64': 1.20260305.0
 
-  wrangler@4.69.0(@cloudflare/workers-types@4.20260301.1):
+  wrangler@4.69.0(@cloudflare/workers-types@4.20260305.0):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.2
       '@cloudflare/unenv-preset': 2.14.0(unenv@2.0.0-rc.24)(workerd@1.20260305.0)
@@ -2198,7 +2198,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       workerd: 1.20260305.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20260301.1
+      '@cloudflare/workers-types': 4.20260305.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil
