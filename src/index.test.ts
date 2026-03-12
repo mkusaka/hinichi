@@ -86,6 +86,24 @@ describe("GET /:category", () => {
     expect(body.details?.join("\n")).toContain("BROWSER_RENDERING_API_TOKEN");
   });
 
+  it("returns themed HTML error page for summary request when AI bindings are missing", async () => {
+    const res = await app.request(
+      "http://localhost/it?format=html&summary=ai&date=20260210",
+      undefined,
+      {
+        GOOGLE_AI_API_KEY: "",
+        BROWSER_RENDERING_ACCOUNT_ID: "",
+        BROWSER_RENDERING_API_TOKEN: "",
+      },
+    );
+    expect(res.status).toBe(500);
+
+    const body = await res.text();
+    expect(body).toContain("color-scheme: light dark;");
+    expect(body).toContain("@media (prefers-color-scheme: dark)");
+    expect(body).toContain("AI要約の設定が不足しています");
+  });
+
   it("returns RSS feed with extracted entries", async () => {
     fetchMock
       .get("https://b.hatena.ne.jp")
@@ -151,6 +169,8 @@ describe("GET /:category", () => {
     expect(body).toContain("123 users");
     expect(body).toContain("example.com");
     expect(body).toContain('href="https://b.hatena.ne.jp/hotentry/it/20260210"');
+    expect(body).toContain("color-scheme: light dark;");
+    expect(body).toContain("@media (prefers-color-scheme: dark)");
   });
 
   it("returns 502 when hatena returns error", async () => {

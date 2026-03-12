@@ -66,72 +66,75 @@ export function renderHtmlPage(
   <title>${esc(title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho+B1:wght@700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --ink: #1a1a1a;
-      --ink-light: #555;
-      --ink-muted: #888;
-      --bg: #fafaf8;
-      --bg-card: #fff;
-      --border: #e0ddd8;
-      --accent: #c0392b;
-      --accent-soft: #fdf2f0;
-      --tag-bg: #f0eeea;
-      --serif: 'Noto Serif JP', serif;
-      --sans: 'Noto Sans JP', sans-serif;
-    }
+    ${buildThemeCss()}
     *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; line-height: 1.7; -webkit-font-smoothing: antialiased; }
-    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    body { font-family: var(--sans); color: var(--ink); background:
+      radial-gradient(circle at top, var(--accent-soft) 0%, transparent 36%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 100%);
+      margin: 0; padding: 0; min-height: 100vh; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    @keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    ::selection { background: var(--accent); color: var(--bg); }
+    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; animation: pageIn 0.35s ease-out; }
 
-    header { border-bottom: 3px double var(--border); padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
-    header h1 { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; margin: 0 0 0.25rem; letter-spacing: 0.02em; }
+    header { border-bottom: 3px double var(--border-strong); padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
+    header h1 { font-family: var(--serif); font-size: 2rem; font-weight: 800; margin: 0 0 0.25rem; letter-spacing: 0.08em; }
     header .date { font-size: 0.85rem; color: var(--ink-muted); }
-    header .date a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--border); transition: color 0.15s, border-color 0.15s; }
+    header .date a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--border-strong); transition: color 0.15s, border-color 0.15s; }
     header .date a:hover { color: var(--accent); border-color: var(--accent); }
 
     .controls { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 2rem; }
     .controls label { font-size: 0.8rem; color: var(--ink-muted); display: flex; flex-direction: column; gap: 0.25rem; }
-    .controls select, .controls input[type="date"] { font-family: var(--sans); font-size: 0.85rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); color: var(--ink); cursor: pointer; }
-    .controls select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; padding-right: 1.5rem; }
-    .controls select:focus, .controls input[type="date"]:focus { outline: none; border-color: var(--accent); }
+    .controls select, .controls input[type="date"] { font-family: var(--sans); font-size: 0.85rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); color: var(--ink); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s; }
+    .controls select { appearance: none; background-image:
+      linear-gradient(45deg, transparent 50%, currentColor 50%),
+      linear-gradient(135deg, currentColor 50%, transparent 50%);
+      background-position:
+        calc(100% - 0.9rem) calc(50% - 0.12rem),
+        calc(100% - 0.6rem) calc(50% - 0.12rem);
+      background-size: 0.3rem 0.3rem;
+      background-repeat: no-repeat;
+      padding-right: 1.6rem; }
+    .controls select:focus, .controls input[type="date"]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
     .feed-links { margin-left: auto; display: flex; gap: 0.5rem; align-items: center; }
-    .feed-links a { font-size: 0.85rem; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.4rem 0.6rem; transition: border-color 0.15s, color 0.15s; }
-    .feed-links a:hover { border-color: var(--accent); color: var(--accent); }
-    .revalidate-btn { font-family: var(--sans); font-size: 0.85rem; color: var(--ink-muted); background: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.4rem 0.6rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
-    .revalidate-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .feed-links a { font-size: 0.85rem; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.4rem 0.6rem; background: var(--surface-muted); transition: border-color 0.15s, color 0.15s, background-color 0.15s; }
+    .feed-links a:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-card); }
+    .revalidate-btn { font-family: var(--sans); font-size: 0.85rem; color: var(--ink-muted); background: var(--surface-muted); border: 1px solid var(--border); border-radius: 3px; padding: 0.4rem 0.6rem; cursor: pointer; transition: border-color 0.15s, color 0.15s, background-color 0.15s; }
+    .revalidate-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-card); }
     .revalidate-btn.loading { opacity: 0.5; pointer-events: none; }
 
-    .summary { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 1.5rem 1.75rem; margin-bottom: 2.5rem; }
+    .summary { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); box-shadow: var(--shadow-soft); padding: 1.5rem 1.75rem; margin-bottom: 2.5rem; }
     .summary-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.75rem; }
     .summary-header h2 { font-family: var(--serif); font-size: 1.15rem; margin: 0; letter-spacing: 0.02em; }
-    .copy-btn { font-family: var(--sans); font-size: 0.75rem; color: var(--ink-muted); background: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.25rem 0.6rem; cursor: pointer; transition: all 0.15s; }
-    .copy-btn:hover { border-color: var(--ink-light); color: var(--ink-light); }
-    .copy-btn.copied { border-color: #27ae60; color: #27ae60; }
+    .copy-btn { font-family: var(--sans); font-size: 0.75rem; color: var(--ink-muted); background: var(--surface-muted); border: 1px solid var(--border); border-radius: 3px; padding: 0.25rem 0.6rem; cursor: pointer; transition: all 0.15s; }
+    .copy-btn:hover { border-color: var(--ink-light); color: var(--ink-light); background: var(--bg-card); }
+    .copy-btn.copied { border-color: var(--success); color: var(--success); }
     .summary .overview { font-size: 0.95rem; line-height: 1.8; color: var(--ink-light); margin-bottom: 1.25rem; }
     .summary h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); margin: 1.25rem 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
     .summary ul { list-style: none; padding: 0; margin: 0; }
-    .summary li { padding: 0.5rem 0; border-bottom: 1px solid #f0eeea; line-height: 1.6; }
+    .summary li { padding: 0.5rem 0; border-bottom: 1px solid var(--summary-divider); line-height: 1.6; }
     .summary li:last-child { border-bottom: none; }
     .summary li a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 0.9rem; }
     .summary li a:hover { color: var(--accent); }
     .article-summary { display: block; font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.15rem; }
 
     .entries { display: flex; flex-direction: column; gap: 0; }
-    article { padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+    article { padding: 1.25rem 0 1.25rem 0.75rem; border-bottom: 1px solid var(--border); border-left: 2px solid transparent; transition: border-left-color 0.2s ease; }
+    article:hover { border-left-color: var(--accent); }
     article:first-child { padding-top: 0; }
     article h3 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; line-height: 1.5; }
-    article h3 a { color: var(--ink); text-decoration: none; transition: color 0.15s; }
-    article h3 a:hover { color: var(--accent); }
+    article h3 a { color: var(--ink); text-decoration: none; background: linear-gradient(var(--accent), var(--accent)) 0 100% / 0 1px no-repeat; transition: color 0.2s, background-size 0.3s ease; }
+    article h3 a:hover { color: var(--accent); background-size: 100% 1px; }
     .meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
-    .users { font-size: 0.78rem; font-weight: 700; color: var(--accent); }
+    .users { font-size: 0.72rem; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 0.1rem 0.4rem; border-radius: 2px; }
     .domain { font-size: 0.78rem; color: var(--ink-muted); }
     article p { font-size: 0.88rem; color: var(--ink-light); margin: 0.4rem 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
-    .tags span { font-size: 0.72rem; color: var(--ink-muted); background: var(--tag-bg); padding: 0.15rem 0.45rem; border-radius: 2px; }
+    .tags span { font-size: 0.72rem; color: var(--ink-muted); background: var(--tag-bg); padding: 0.15rem 0.45rem; border-radius: 3px; transition: background-color 0.15s, color 0.15s; cursor: default; }
+    .tags span:hover { background: var(--border); color: var(--ink-light); }
 
-    footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--ink-muted); text-align: center; }
+    footer { margin-top: 3rem; padding-top: 1rem; border-top: 3px double var(--border-strong); font-size: 0.75rem; color: var(--ink-muted); text-align: center; letter-spacing: 0.1em; }
   </style>
 </head>
 <body>
@@ -246,6 +249,51 @@ function buildCopyText(summary: AISummaryResult): string {
   return lines.join("\n");
 }
 
+function buildThemeCss(): string {
+  return `
+    :root {
+      color-scheme: light dark;
+      --ink: #1a1a1a;
+      --ink-light: #555;
+      --ink-muted: #7b746c;
+      --bg: #f7f2eb;
+      --bg-elevated: #fffdfa;
+      --bg-card: rgba(255, 252, 248, 0.92);
+      --border: #ded4c7;
+      --border-strong: #ccbfaf;
+      --accent: #c0392b;
+      --accent-soft: rgba(192, 57, 43, 0.12);
+      --tag-bg: #eee5dc;
+      --surface-muted: rgba(255, 250, 245, 0.75);
+      --summary-divider: #eee3d7;
+      --success: #2f8f57;
+      --shadow-soft: 0 10px 30px rgba(62, 39, 26, 0.08);
+      --serif: 'Shippori Mincho B1', serif;
+      --sans: 'Noto Sans JP', sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #f3ece5;
+        --ink-light: #d2c7ba;
+        --ink-muted: #b5a89c;
+        --bg: #14110f;
+        --bg-elevated: #1d1815;
+        --bg-card: rgba(31, 24, 20, 0.92);
+        --border: #3f332b;
+        --border-strong: #57483d;
+        --accent: #ff8f7c;
+        --accent-soft: rgba(255, 143, 124, 0.16);
+        --tag-bg: #302720;
+        --surface-muted: rgba(39, 31, 26, 0.82);
+        --summary-divider: #342b24;
+        --success: #72d69a;
+        --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.3);
+      }
+    }
+  `;
+}
+
 interface ErrorPageOptions {
   details?: string[];
   linkHref?: string;
@@ -275,17 +323,22 @@ export function renderErrorPage(
   <title>hinichi — エラー</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho+B1:wght@700;800&display=swap" rel="stylesheet">
   <style>
-    :root { --ink: #1a1a1a; --ink-muted: #888; --bg: #fafaf8; --border: #e0ddd8; --accent: #c0392b; --serif: 'Noto Serif JP', serif; --sans: 'Noto Sans JP', sans-serif; }
+    ${buildThemeCss()}
     *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; line-height: 1.7; -webkit-font-smoothing: antialiased; }
-    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-    header { border-bottom: 3px double var(--border); padding-bottom: 1.25rem; margin-bottom: 2rem; }
-    header h1 { font-family: var(--serif); font-size: 1.75rem; margin: 0; }
-    .error-box { border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 2rem; margin: 2rem 0; }
+    body { font-family: var(--sans); color: var(--ink); background:
+      radial-gradient(circle at top, var(--accent-soft) 0%, transparent 36%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 100%);
+      margin: 0; padding: 0; min-height: 100vh; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    @keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    ::selection { background: var(--accent); color: var(--bg); }
+    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; animation: pageIn 0.35s ease-out; }
+    header { border-bottom: 3px double var(--border-strong); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+    header h1 { font-family: var(--serif); font-size: 2rem; font-weight: 800; margin: 0; letter-spacing: 0.08em; }
+    .error-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); box-shadow: var(--shadow-soft); padding: 2rem; margin: 2rem 0; }
     .error-box h2 { font-family: var(--serif); font-size: 1.2rem; margin: 0 0 0.75rem; color: var(--accent); }
-    .error-box p { color: var(--ink-muted); line-height: 1.7; margin: 0 0 1rem; }
+    .error-box p { color: var(--ink-light); line-height: 1.7; margin: 0 0 1rem; }
     .error-box a { color: var(--accent); text-decoration: none; }
     .error-box a:hover { text-decoration: underline; }
   </style>
