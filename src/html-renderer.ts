@@ -15,28 +15,28 @@ export function renderHtmlPage(
   options: RenderOptions,
 ): string {
   const label = CATEGORY_LABELS[category];
-  const title = `HINICHI // ${label} // ${dateStr}`;
+  const title = `HINICHI — ${label} — ${dateStr}`;
   const hotentryUrl = `https://b.hatena.ne.jp/hotentry/${category}/${dateStr.replace(/-/g, "")}`;
   const maxUsers = Math.max(...entries.map((e) => e.users), 1);
 
   const summarySection = options.summary ? buildSummarySection(options.summary) : "";
-  const hero = entries.length > 0 ? buildHero(entries[0], maxUsers) : "";
-  const feed = entries
+  const splash = entries.length > 0 ? buildSplash(entries[0], maxUsers) : "";
+  const cards = entries
     .slice(1)
-    .map((e, i) => buildEntry(e, i, maxUsers))
+    .map((entry, index) => buildCard(entry, index, maxUsers))
     .join("\n");
 
-  const catOpts = CATEGORIES.map(
+  const categoryOptions = CATEGORIES.map(
     (c) =>
       `<option value="${c}"${c === category ? " selected" : ""}>${esc(CATEGORY_LABELS[c])}</option>`,
   ).join("");
-  const fmtOpts = ["html", "rss", "atom", "json"]
+  const formatOptions = ["html", "rss", "atom", "json"]
     .map(
       (f) =>
         `<option value="${f}"${f === options.currentFormat ? " selected" : ""}>${f.toUpperCase()}</option>`,
     )
     .join("");
-  const sumOpts = [
+  const summaryOptions = [
     { value: "", label: "OFF" },
     { value: "ai", label: "AI" },
     { value: "aiOnly", label: "AI ONLY" },
@@ -55,88 +55,109 @@ export function renderHtmlPage(
 <title>${esc(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>${buildCss()}</style>
 </head>
 <body>
 <canvas id="voidBg" aria-hidden="true"></canvas>
-<div class="scanlines" aria-hidden="true"></div>
-<div class="progress-bar" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scroll-line" aria-hidden="true"></div>
 <div id="cursorGlow" aria-hidden="true"></div>
+${buildSvgFilters()}
 
-<header class="cmd">
-  <div class="cmd-l">
-    <h1 class="logo" data-text="HINICHI">HINICHI</h1>
-    <span class="sep">//</span>
-    <a href="${escapeAttr(hotentryUrl)}" class="cmd-lbl">${esc(label)}</a>
-    <span class="sep">//</span>
-    <span class="cmd-lbl">${esc(dateStr)}</span>
-  </div>
-  <nav class="cmd-r">
-    <select id="sel-category">${catOpts}</select>
+<header class="topbar">
+  <a href="${escapeAttr(hotentryUrl)}" class="topbar-source">${esc(label)} <span class="topbar-date">${esc(dateStr)}</span></a>
+  <nav class="topbar-controls">
+    <select id="sel-category">${categoryOptions}</select>
     <input type="date" id="sel-date" value="${dateStr}" />
-    <select id="sel-format">${fmtOpts}</select>
-    <select id="sel-summary">${sumOpts}</select>
+    <select id="sel-format">${formatOptions}</select>
+    <select id="sel-summary">${summaryOptions}</select>
     <button id="btn-revalidate" title="revalidate">&#x21bb;</button>
   </nav>
 </header>
 
-<main>
-${hero}
+${splash}
 ${summarySection}
-<div class="feed">${feed}</div>
+
+<main class="magazine">
+${cards}
 </main>
 
-<footer><span class="prompt">&gt;_</span> hinichi &mdash; はてなブックマーク デイリーダイジェスト</footer>
+<footer>
+  <span class="footer-brand">HINICHI</span>
+  <span class="footer-sub">はてなブックマーク デイリーダイジェスト</span>
+</footer>
 
 <script type="module" src="/client.js"></script>
 </body>
 </html>`;
 }
 
-function buildHero(e: HatenaEntry, maxUsers: number): string {
-  const pct = Math.round((e.users / maxUsers) * 100);
-  const bg = e.imageUrl ? ` style="background-image:url(${escapeAttr(e.imageUrl)})"` : "";
+/* ── Splash: full-viewport hero for #1 article ── */
+
+function buildSplash(entry: HatenaEntry, maxUsers: number): string {
+  const userPercentage = Math.round((entry.users / maxUsers) * 100);
+  const imageHtml = entry.imageUrl
+    ? `<img class="splash-img" src="${escapeAttr(entry.imageUrl)}" alt="" />`
+    : "";
+  const noImageClass = entry.imageUrl ? "" : " splash--no-image";
   const tags =
-    e.tags.length > 0
-      ? `<div class="tags">${e.tags.map((t) => `<span>#${esc(t)}</span>`).join("")}</div>`
+    entry.tags.length > 0
+      ? `<div class="tags">${entry.tags.map((t) => `<span>#${esc(t)}</span>`).join("")}</div>`
       : "";
-  return `<section class="hero"${bg}>
-  <div class="hero-over">
-    <div class="hero-rank" aria-hidden="true">01</div>
-    <div class="hero-body">
-      <div class="meta"><span class="ubadge">${e.users} users</span><span class="domain">${esc(e.domain)}</span></div>
-      <div class="pop"><div class="pop-fill" style="width:${pct}%"></div></div>
-      <h2><a href="${escapeAttr(e.url)}">${esc(e.title)}</a></h2>
-      ${e.description ? `<p>${esc(e.description)}</p>` : ""}
+
+  return `<section class="splash${noImageClass}">
+  ${imageHtml}
+  <div class="splash-overlay">
+    <div class="splash-brand" aria-hidden="true">HINICHI</div>
+    <div class="splash-content">
+      <div class="splash-rank" aria-hidden="true">01</div>
+      <div class="card-meta">
+        <span class="users-badge">${entry.users} users</span>
+        <span class="meta-dot">&middot;</span>
+        <span class="domain-label">${esc(entry.domain)}</span>
+      </div>
+      <div class="pop-bar"><div class="pop-fill" style="width:${userPercentage}%"></div></div>
+      <h1 class="splash-title"><a href="${escapeAttr(entry.url)}">${esc(entry.title)}</a></h1>
+      ${entry.description ? `<p class="splash-desc">${esc(entry.description)}</p>` : ""}
       ${tags}
     </div>
   </div>
+  <div class="splash-cut" aria-hidden="true"></div>
 </section>`;
 }
 
-function buildEntry(e: HatenaEntry, index: number, maxUsers: number): string {
+/* ── Card: magazine grid entry ── */
+
+function buildCard(entry: HatenaEntry, index: number, maxUsers: number): string {
   const rank = String(index + 2).padStart(2, "0");
-  const pct = Math.round((e.users / maxUsers) * 100);
-  const img = e.imageUrl
-    ? `<img class="entry-img" src="${escapeAttr(e.imageUrl)}" alt="" loading="lazy" onerror="this.remove()" />`
+  const userPercentage = Math.round((entry.users / maxUsers) * 100);
+  const imageHtml = entry.imageUrl
+    ? `<div class="card-visual"><img src="${escapeAttr(entry.imageUrl)}" alt="" loading="lazy" onerror="this.parentElement.remove()" /></div>`
     : "";
   const tags =
-    e.tags.length > 0
-      ? `<div class="tags">${e.tags.map((t) => `<span>#${esc(t)}</span>`).join("")}</div>`
+    entry.tags.length > 0
+      ? `<div class="tags">${entry.tags.map((t) => `<span>#${esc(t)}</span>`).join("")}</div>`
       : "";
-  return `<article class="entry">
-  <div class="entry-rank">${rank}</div>
-  <div class="entry-main">
-    <div class="meta"><span class="ubadge">${e.users} users</span><span class="domain">${esc(e.domain)}</span></div>
-    <div class="pop"><div class="pop-fill" style="width:${pct}%"></div></div>
-    ${img}
-    <h3><a href="${escapeAttr(e.url)}">${esc(e.title)}</a></h3>
-    ${e.description ? `<p>${esc(e.description)}</p>` : ""}
+
+  return `<article class="card">
+  <div class="card-rank" aria-hidden="true">${rank}</div>
+  ${imageHtml}
+  <div class="card-body">
+    <div class="card-meta">
+      <span class="users-badge">${entry.users} users</span>
+      <span class="meta-dot">&middot;</span>
+      <span class="domain-label">${esc(entry.domain)}</span>
+    </div>
+    <div class="pop-bar"><div class="pop-fill" style="width:${userPercentage}%"></div></div>
+    <h2><a href="${escapeAttr(entry.url)}">${esc(entry.title)}</a></h2>
+    ${entry.description ? `<p>${esc(entry.description)}</p>` : ""}
     ${tags}
   </div>
 </article>`;
 }
+
+/* ── Summary section ── */
 
 function buildSummarySection(summary: AISummaryResult): string {
   const articleList = summary.articles
@@ -147,12 +168,12 @@ function buildSummarySection(summary: AISummaryResult): string {
     .join("\n      ");
   const copyText = buildCopyText(summary);
   return `<section class="summary">
-  <div class="summary-head">
-    <h2>// SUMMARY</h2>
+  <div class="summary-header">
+    <h2>Summary</h2>
     <button class="copy-btn" data-copy-text="${escapeAttr(copyText)}">COPY</button>
   </div>
   <div class="overview">${esc(summary.overview)}</div>
-  <h3>ARTICLES</h3>
+  <h3>Articles</h3>
   <ul>${articleList}</ul>
 </section>`;
 }
@@ -165,6 +186,29 @@ function buildCopyText(summary: AISummaryResult): string {
   }
   return lines.join("\n");
 }
+
+/* ── Inline SVG filters ── */
+
+function buildSvgFilters(): string {
+  return `<svg style="position:absolute;width:0;height:0" aria-hidden="true">
+  <defs>
+    <filter id="chromatic" x="-10%" y="-10%" width="120%" height="120%">
+      <feColorMatrix in="SourceGraphic" type="matrix"
+        values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red"/>
+      <feOffset in="red" dx="4" dy="0" result="red-shifted"/>
+      <feColorMatrix in="SourceGraphic" type="matrix"
+        values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green"/>
+      <feColorMatrix in="SourceGraphic" type="matrix"
+        values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue"/>
+      <feOffset in="blue" dx="-4" dy="0" result="blue-shifted"/>
+      <feBlend in="red-shifted" in2="green" mode="screen" result="rg"/>
+      <feBlend in="rg" in2="blue-shifted" mode="screen"/>
+    </filter>
+  </defs>
+</svg>`;
+}
+
+/* ── Error page ── */
 
 interface ErrorPageOptions {
   details?: string[];
@@ -195,17 +239,17 @@ export function renderErrorPage(
 <title>HINICHI &mdash; ERROR</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>${buildCss()}</style>
 </head>
 <body>
 <canvas id="voidBg" aria-hidden="true"></canvas>
-<div class="scanlines" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
 
 <div class="err-wrap">
-  <h1 class="logo" data-text="HINICHI">HINICHI</h1>
+  <div class="err-brand" aria-hidden="true">HINICHI</div>
   <div class="err-box">
-    <div class="err-label">// ERROR</div>
+    <div class="err-label">ERROR</div>
     <h2>${esc(message)}</h2>
     ${detailsHtml}
     <p><a href="${escapeAttr(linkHref)}">${esc(linkLabel)} &rarr;</a></p>
@@ -217,174 +261,550 @@ export function renderErrorPage(
 </html>`;
 }
 
-/* ── CSS ────────────────────────────────────────────── */
+/* ── CSS ── */
 
 function buildCss(): string {
   return `
+/* ── Theme ── */
 :root {
   color-scheme: light dark;
-  --bg:#f5f2eb;--surface:#eae7e0;
-  --ink:#0a0a1e;--ink2:#2a2a3e;--ink3:#6a6a7e;
-  --c1:#007a7a;--c2:#b31060;--c3:#4a3fb5;
-  --border:#d0cbc3;
-  --display:'Orbitron',monospace;
-  --mono:'JetBrains Mono','Menlo',monospace;
+  --bg: #f8f5f0;
+  --surface: #eee9e2;
+  --text: #1a1714;
+  --text-muted: #8a8580;
+  --text-dim: #c0bbb5;
+  --accent: #1a6b5a;
+  --accent-hot: #e04225;
+  --border: #ddd8d0;
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Menlo', monospace;
 }
-@media (prefers-color-scheme: dark) {:root{
-  --bg:#05050f;--surface:#0c0c1a;
-  --ink:#e8e8f0;--ink2:#a8a8b8;--ink3:#55556a;
-  --c1:#00ffd5;--c2:#ff2d95;--c3:#6c63ff;
-  --border:#1a1a2e;
-}}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #08080a;
+    --surface: #111114;
+    --text: #e8e4df;
+    --text-muted: #6b6560;
+    --text-dim: #2e2a28;
+    --accent: #beff3a;
+    --accent-hot: #ff3a3a;
+    --border: #222225;
+  }
+}
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-::selection{background:var(--c1);color:#000}
-:focus-visible{outline:2px solid var(--c1);outline-offset:2px}
-body{font-family:var(--mono);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* ── Reset ── */
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0 }
+::selection { background: var(--accent); color: #000 }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+html { scroll-behavior: smooth }
+body {
+  font-family: var(--font-mono);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
 
-/* ── background layers ── */
-#voidBg{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
-@media (prefers-color-scheme:light){#voidBg{opacity:.05}}
-.scanlines{position:fixed;inset:0;z-index:2;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent 0px,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px)}
-@media (prefers-color-scheme:light){.scanlines{opacity:.2}}
-.progress-bar{position:fixed;top:0;left:0;height:2px;width:0;
-  background:linear-gradient(90deg,var(--c1),var(--c2));z-index:10001;transition:width .1s linear}
-#cursorGlow{position:fixed;width:280px;height:280px;border-radius:50%;
-  background:radial-gradient(circle,var(--c1),transparent 70%);
-  pointer-events:none;z-index:1;transform:translate(-50%,-50%);opacity:0;
-  transition:opacity .4s;mix-blend-mode:screen;filter:blur(40px)}
-@media (prefers-color-scheme:light){#cursorGlow{display:none}}
+/* ── Background layers ── */
+#voidBg {
+  position: fixed; inset: 0; z-index: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+@media (prefers-color-scheme: light) { #voidBg { opacity: 0.04 } }
 
-/* ── command bar ── */
-.cmd{position:fixed;top:0;left:0;right:0;z-index:100;height:48px;display:flex;align-items:center;
-  justify-content:space-between;padding:0 1.5rem;border-bottom:1px solid var(--border);font-size:.75rem;
-  background:var(--surface);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-@media (prefers-color-scheme:dark){.cmd{background:rgba(12,12,26,.85)}}
-.cmd-l,.cmd-r{display:flex;align-items:center;gap:.75rem}
-.cmd-r{flex-wrap:wrap}
-.sep{color:var(--ink3);font-weight:300}
-.cmd-lbl{color:var(--ink2);text-decoration:none;transition:color .15s}
-.cmd-lbl:hover{color:var(--c1)}
-.cmd select,.cmd input[type="date"]{font-family:var(--mono);font-size:.7rem;padding:.25rem .5rem;
-  background:transparent;border:1px solid var(--border);color:var(--ink);cursor:pointer;appearance:none}
-.cmd select:focus,.cmd input:focus{outline:none;border-color:var(--c1);box-shadow:0 0 0 1px var(--c1)}
-.cmd button{font-family:var(--mono);font-size:.8rem;padding:.2rem .5rem;
-  background:transparent;border:1px solid var(--border);color:var(--ink);cursor:pointer;transition:all .15s}
-.cmd button:hover{border-color:var(--c1);color:var(--c1)}
+.grain { position: fixed; inset: 0; pointer-events: none; z-index: 9998 }
+.grain::before {
+  content: "";
+  position: absolute; inset: -50%;
+  width: 200%; height: 200%;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 0.5s steps(4) infinite;
+}
+@keyframes grain-shift {
+  0%  { transform: translate(0, 0) }
+  25% { transform: translate(-2%, -4%) }
+  50% { transform: translate(3%, 1%) }
+  75% { transform: translate(-1%, 3%) }
+}
 
-/* ── logo glitch ── */
-.logo{font-family:var(--display);font-weight:900;font-size:.85rem;letter-spacing:.2em;
-  color:var(--c1);position:relative;display:inline-block;line-height:1}
-.logo::before,.logo::after{content:attr(data-text);position:absolute;left:0;top:0;overflow:hidden;pointer-events:none}
-.logo::before{color:var(--c2);z-index:-1;animation:g1 3s infinite linear alternate-reverse}
-.logo::after{color:var(--c3);z-index:-1;animation:g2 2s infinite linear alternate-reverse}
-@keyframes g1{
-  0%,100%{clip-path:inset(0 0 95% 0);transform:translate(0)}
-  20%{clip-path:inset(15% 0 65% 0);transform:translate(-2px,1px)}
-  40%{clip-path:inset(45% 0 25% 0);transform:translate(2px,-1px)}
-  60%{clip-path:inset(70% 0 10% 0);transform:translate(-1px,2px)}
-  80%{clip-path:inset(5% 0 85% 0);transform:translate(1px,-1px)}}
-@keyframes g2{
-  0%,100%{clip-path:inset(95% 0 0 0);transform:translate(0)}
-  25%{clip-path:inset(55% 0 15% 0);transform:translate(2px,-1px)}
-  50%{clip-path:inset(25% 0 45% 0);transform:translate(-2px,1px)}
-  75%{clip-path:inset(5% 0 75% 0);transform:translate(1px,1px)}}
+.scroll-line {
+  position: fixed; left: 0; top: 0;
+  width: 3px; height: 0;
+  background: var(--accent);
+  z-index: 10001;
+}
 
-/* ── main ── */
-main{padding-top:48px;position:relative;z-index:1}
+#cursorGlow {
+  position: fixed; width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent), transparent 70%);
+  pointer-events: none; z-index: 1;
+  transform: translate(-50%, -50%);
+  opacity: 0; transition: opacity 0.4s;
+  mix-blend-mode: screen;
+  filter: blur(50px);
+}
+@media (prefers-color-scheme: light) { #cursorGlow { display: none } }
 
-/* ── hero ── */
-.hero{margin-top:-48px;min-height:100vh;background-color:#0c0c1a;background-size:cover;background-position:center;
-  display:flex;align-items:flex-end;position:relative}
-.hero-over{width:100%;padding:80px 3rem 3rem;position:relative;
-  background:linear-gradient(to top,rgba(5,5,15,.95),rgba(5,5,15,.5) 50%,transparent)}
-.hero-rank{position:absolute;bottom:2rem;right:3rem;font-family:var(--display);font-weight:900;
-  font-size:10rem;line-height:1;color:#00ffd5;opacity:.07;pointer-events:none;user-select:none}
-.hero-body{max-width:700px}
-.hero h2{font-family:var(--display);font-size:2.2rem;font-weight:700;line-height:1.2;margin:.5rem 0}
-.hero h2 a{color:#fff;text-decoration:none}
-.hero p{color:rgba(255,255,255,.65);font-size:.88rem;line-height:1.6;margin:.25rem 0 0}
-.hero .ubadge{font-weight:700;color:#00ffd5;letter-spacing:.05em}
-.hero .domain{color:rgba(255,255,255,.45)}
-.hero .meta{display:flex;gap:.75rem;align-items:center;font-size:.75rem}
-.hero .pop{max-width:180px}
-.hero .tags span{color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.2)}
+/* ── @property for animated gradient ── */
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
 
-/* ── feed ── */
-.feed{max-width:960px;margin:0 auto;padding:2rem 0}
+/* ── Topbar ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100; height: 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.5rem;
+  font-size: 0.7rem;
+  background: rgba(248, 245, 240, 0.6);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+@media (prefers-color-scheme: dark) {
+  .topbar {
+    background: rgba(8, 8, 10, 0.6);
+    border-bottom-color: rgba(255,255,255,0.06);
+  }
+}
+.topbar-source {
+  font-family: var(--font-mono);
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+.topbar-source:hover { color: var(--accent) }
+.topbar-date { opacity: 0.5 }
+.topbar-controls { display: flex; align-items: center; gap: 0.5rem }
+.topbar select, .topbar input[type="date"] {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  padding: 0.2rem 0.4rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer; appearance: none;
+}
+.topbar select:focus, .topbar input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.topbar button {
+  font-family: var(--font-mono); font-size: 0.75rem;
+  padding: 0.15rem 0.4rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.topbar button:hover { border-color: var(--accent); color: var(--accent) }
 
-/* ── entry ── */
-.entry{display:flex;gap:2rem;padding:3rem;border-bottom:1px solid var(--border)}
-.entry-rank{font-family:var(--display);font-weight:900;font-size:3rem;line-height:1;
-  color:var(--c1);opacity:.2;flex-shrink:0;width:5rem;text-align:right}
-.entry-main{flex:1;min-width:0}
-.entry-img{width:100%;max-height:360px;object-fit:cover;display:block;margin:.75rem 0}
-.entry h3{font-family:var(--display);font-size:1.15rem;font-weight:700;line-height:1.3;margin:.5rem 0 .25rem}
-.entry h3 a{color:var(--ink);text-decoration:none;transition:color .15s}
-.entry h3 a:hover{color:var(--c1)}
-.entry p{font-size:.84rem;color:var(--ink2);line-height:1.6}
+/* ── Splash (full-viewport hero) ── */
+.splash {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  background: var(--surface);
+}
+.splash-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; z-index: 0;
+}
+.splash-overlay {
+  position: relative; z-index: 2;
+  width: 100%;
+  padding: 4rem 3rem;
+  background: linear-gradient(
+    to top,
+    rgba(8,8,10,0.92) 0%,
+    rgba(8,8,10,0.5) 50%,
+    transparent 100%
+  );
+}
+.splash--no-image .splash-overlay {
+  background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
+}
+.splash-brand {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(6rem, 22vw, 20rem);
+  font-weight: 800;
+  color: #fff;
+  mix-blend-mode: difference;
+  pointer-events: none; user-select: none;
+  white-space: nowrap;
+  letter-spacing: -0.03em;
+  z-index: 3;
+}
+.splash-rank {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 10vw, 8rem);
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1;
+  opacity: 0.25;
+  margin-bottom: 0.5rem;
+}
+.splash-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4.5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.08;
+  max-width: 800px;
+  margin: 0.5rem 0;
+}
+.splash-title a { color: #fff; text-decoration: none; transition: opacity 0.2s }
+.splash-title a:hover { opacity: 0.8 }
+.splash-desc {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.85rem;
+  max-width: 600px;
+  margin-top: 0.5rem;
+}
+.splash .card-meta { color: rgba(255,255,255,0.6) }
+.splash .users-badge { color: var(--accent) }
+.splash .domain-label { color: rgba(255,255,255,0.4) }
+.splash .pop-bar { background: rgba(255,255,255,0.15); max-width: 300px }
+.splash .tags span { color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.15) }
 
-/* ── shared: meta, pop, tags ── */
-.meta{display:flex;gap:.75rem;align-items:center;font-size:.75rem}
-.ubadge{font-weight:700;color:var(--c1);letter-spacing:.05em}
-.domain{color:var(--ink3)}
-.pop{height:2px;background:var(--border);margin:.5rem 0;max-width:200px}
-.pop-fill{height:100%;background:linear-gradient(90deg,var(--c1),var(--c2))}
-.tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
-.tags span{font-size:.68rem;color:var(--ink3);border:1px solid var(--border);padding:.08rem .5rem;letter-spacing:.02em;transition:border-color .15s}
-.tags span:hover{border-color:var(--c1);color:var(--c1)}
+/* Diagonal cut at splash bottom */
+.splash-cut {
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 80px;
+  background: var(--bg);
+  clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+  z-index: 4;
+}
 
-/* ── summary ── */
-.summary{max-width:960px;margin:2rem auto;padding:2rem 3rem;background:var(--surface);border:1px solid var(--border)}
-.summary-head{display:flex;justify-content:space-between;align-items:baseline}
-.summary-head h2{font-family:var(--display);font-size:.7rem;letter-spacing:.15em;color:var(--c1);font-weight:700}
-.copy-btn{font-family:var(--mono);font-size:.65rem;color:var(--ink3);background:transparent;
-  border:1px solid var(--border);padding:.15rem .5rem;cursor:pointer;transition:all .15s}
-.copy-btn:hover{border-color:var(--c1);color:var(--c1)}
-.copy-btn.copied{border-color:#22c55e;color:#22c55e}
-.summary .overview{font-size:.85rem;line-height:1.8;color:var(--ink2);margin:.75rem 0 1rem}
-.summary h3{font-family:var(--display);font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;
-  color:var(--ink3);margin:1rem 0 .5rem;border-bottom:1px solid var(--border);padding-bottom:.3rem}
-.summary ul{list-style:none}
-.summary li{padding:.4rem 0;border-bottom:1px solid var(--border)}
-.summary li:last-child{border-bottom:none}
-.summary li a{color:var(--ink);text-decoration:none;font-weight:500;font-size:.82rem;transition:color .15s}
-.summary li a:hover{color:var(--c1)}
-.article-summary{display:block;font-size:.75rem;color:var(--ink3);margin-top:.1rem}
+/* Animated conic gradient overlay */
+.splash::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: conic-gradient(
+    from var(--gradient-angle) at 30% 70%,
+    var(--accent) 0deg,
+    var(--accent-hot) 120deg,
+    transparent 240deg,
+    var(--accent) 360deg
+  );
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  z-index: 1;
+  animation: rotate-gradient 20s linear infinite;
+}
+@keyframes rotate-gradient { to { --gradient-angle: 360deg } }
 
-/* ── error ── */
-.err-wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;padding:2rem;gap:2rem}
-.err-box{max-width:500px;width:100%;padding:2rem;background:var(--surface);border:1px solid var(--border)}
-.err-label{font-family:var(--display);font-size:.65rem;letter-spacing:.15em;color:var(--c2);margin-bottom:1rem}
-.err-box h2{font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--c2);margin:0 0 1rem}
-.err-box p{font-size:.85rem;color:var(--ink2);line-height:1.7;margin:0 0 .5rem}
-.err-box a{color:var(--c1);text-decoration:none;transition:opacity .15s}
-.err-box a:hover{opacity:.75}
+/* ── Shared: meta, popularity, tags ── */
+.card-meta {
+  display: flex; gap: 0.5rem; align-items: center;
+  font-size: 0.75rem;
+}
+.users-badge { font-weight: 700; color: var(--accent); letter-spacing: 0.04em }
+.meta-dot { opacity: 0.4 }
+.domain-label { color: var(--text-muted) }
+.pop-bar {
+  height: 2px;
+  background: var(--border);
+  margin: 0.4rem 0;
+  max-width: 200px;
+}
+.pop-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-hot)) }
+.tags { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.6rem }
+.tags span {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 0.1rem 0.5rem;
+  letter-spacing: 0.02em;
+  transition: border-color 0.15s, color 0.15s;
+}
+.tags span:hover { border-color: var(--accent); color: var(--accent) }
 
-/* ── footer ── */
-footer{text-align:center;padding:3rem;font-size:.75rem;color:var(--ink3);border-top:1px solid var(--border);
-  position:relative;z-index:1}
-.prompt{color:var(--c1);font-weight:700}
+/* ── Magazine grid ── */
+.magazine {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border);
+  position: relative; z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+}
 
-/* ── responsive ── */
-@media(max-width:768px){
-  .cmd{flex-wrap:wrap;height:auto;padding:.5rem 1rem;gap:.4rem}
-  .cmd-l,.cmd-r{flex:1 1 100%;justify-content:center;flex-wrap:wrap}
-  .hero-over{padding:60px 1.5rem 2rem}
-  .hero-rank{font-size:5rem;right:1.5rem;bottom:1.5rem}
-  .hero h2{font-size:1.4rem}
-  .hero-body{max-width:none}
-  .entry{flex-direction:column;gap:.5rem;padding:2rem 1.5rem}
-  .entry-rank{width:auto;text-align:left;font-size:2rem}
-  .feed{padding:1rem 0}
-  .summary{padding:1.5rem;margin:1.5rem 1rem}
+/* ── Card ── */
+.card {
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.card-rank {
+  position: absolute;
+  bottom: 0; right: 1rem;
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 8vw, 7rem);
+  font-weight: 800;
+  color: var(--accent);
+  opacity: 0.06;
+  line-height: 1;
+  pointer-events: none; user-select: none;
+}
+.card-visual { width: 100%; overflow: hidden }
+.card-visual img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.23,1,0.32,1), filter 0.4s;
+}
+.card-visual:hover img {
+  transform: scale(1.05);
+  filter: url(#chromatic);
+}
+.card-body { padding: 1.5rem 2rem 2rem; flex: 1 }
+.card h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0.4rem 0 0.25rem;
+}
+.card h2 a { color: var(--text); text-decoration: none; transition: color 0.15s }
+.card h2 a:hover { color: var(--accent) }
+.card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6 }
+
+/* Featured: first 2 cards = full-width horizontal splits */
+.magazine > .card:nth-child(-n+2) {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 50vh;
+}
+.magazine > .card:nth-child(2) .card-visual { order: -1 }
+.magazine > .card:nth-child(-n+2) .card-visual { height: 100% }
+.magazine > .card:nth-child(-n+2) .card-visual img {
+  height: 100%; aspect-ratio: auto;
+}
+.magazine > .card:nth-child(-n+2) .card-body {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 3rem;
+}
+.magazine > .card:nth-child(-n+2) h2 {
+  font-size: clamp(1.3rem, 2.5vw, 2rem);
+}
+.magazine > .card:nth-child(-n+2) .card-rank {
+  font-size: clamp(6rem, 12vw, 10rem);
+  opacity: 0.04;
+}
+
+/* Rhythm break: every 5th regular card goes full-width */
+.magazine > .card:nth-child(n+3):nth-child(5n+3) {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.magazine > .card:nth-child(n+3):nth-child(5n+3) .card-visual { height: 100% }
+.magazine > .card:nth-child(n+3):nth-child(5n+3) .card-visual img {
+  height: 100%; aspect-ratio: auto;
+}
+.magazine > .card:nth-child(n+3):nth-child(5n+3) .card-body {
+  padding: 2.5rem;
+  display: flex; flex-direction: column; justify-content: center;
+}
+
+/* ── Summary ── */
+.summary {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 2.5rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  position: relative; z-index: 1;
+}
+.summary-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--accent);
+}
+.summary-header h2 {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.copy-btn {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent) }
+.copy-btn.copied { border-color: #22c55e; color: #22c55e }
+.summary .overview {
+  font-size: 0.85rem; line-height: 1.8;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+.summary h3 {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin: 1.5rem 0 0.5rem;
+}
+.summary ul { list-style: none }
+.summary li { padding: 0.5rem 0; border-bottom: 1px solid var(--border) }
+.summary li:last-child { border-bottom: none }
+.summary li a {
+  color: var(--text); text-decoration: none;
+  font-weight: 500; font-size: 0.82rem;
+  transition: color 0.15s;
+}
+.summary li a:hover { color: var(--accent) }
+.article-summary {
+  display: block; font-size: 0.75rem;
+  color: var(--text-muted); margin-top: 0.15rem;
+}
+
+/* ── Footer ── */
+footer {
+  text-align: center;
+  padding: 4rem 2rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  position: relative; z-index: 1;
+  background: var(--bg);
+}
+.footer-brand {
+  font-family: var(--font-display);
+  font-weight: 800; font-size: 1rem;
+  color: var(--accent); opacity: 0.3;
+  display: block; margin-bottom: 0.5rem;
+}
+.footer-sub { display: block }
+
+/* ── Error page ── */
+.err-wrap {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem; gap: 2rem;
+}
+.err-brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(3rem, 15vw, 10rem);
+  color: var(--accent); opacity: 0.1;
+}
+.err-box {
+  max-width: 500px; width: 100%;
+  padding: 2.5rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+}
+.err-label {
+  font-family: var(--font-display);
+  font-size: 0.7rem; letter-spacing: 0.15em;
+  color: var(--accent-hot);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.err-box h2 {
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--accent-hot);
+  margin: 0 0 1rem;
+}
+.err-box p {
+  font-size: 0.85rem; color: var(--text-muted);
+  line-height: 1.7; margin: 0 0 0.5rem;
+}
+.err-box a { color: var(--accent); text-decoration: none; transition: opacity 0.15s }
+.err-box a:hover { opacity: 0.75 }
+
+/* ── Scroll-driven animations (progressive enhancement) ── */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .card {
+      animation: card-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 40%;
+    }
+    @keyframes card-reveal {
+      from { opacity: 0; transform: translateY(60px); filter: blur(4px) }
+      to { opacity: 1; transform: none; filter: blur(0) }
+    }
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .topbar {
+    height: auto; flex-wrap: wrap;
+    padding: 0.4rem 1rem; gap: 0.3rem;
+  }
+  .topbar-source { flex: 1 1 100%; text-align: center }
+  .topbar-controls {
+    flex: 1 1 100%;
+    justify-content: center; flex-wrap: wrap;
+  }
+
+  .splash { height: 85vh }
+  .splash-overlay { padding: 2rem 1.5rem }
+  .splash-brand { font-size: clamp(3rem, 18vw, 6rem) }
+  .splash-title { font-size: clamp(1.4rem, 5vw, 2rem) }
+  .splash-cut { height: 40px }
+
+  .magazine { grid-template-columns: 1fr }
+  .magazine > .card:nth-child(-n+2) {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .magazine > .card:nth-child(-n+2) .card-visual img { aspect-ratio: 16 / 10 }
+  .magazine > .card:nth-child(-n+2) .card-body { padding: 1.5rem }
+  .magazine > .card:nth-child(n+3):nth-child(5n+3) { grid-template-columns: 1fr }
+
+  .summary { margin: 2rem 1rem; padding: 1.5rem }
+  .card-body { padding: 1.2rem 1.5rem }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .grain::before, .splash::after { animation: none }
+  .card-visual img { transition: none }
 }
 `;
 }
 
-/* ── Escape helpers ─────────────────────────────────── */
+/* ── Escape helpers ── */
 
 function esc(str: string): string {
   return str
