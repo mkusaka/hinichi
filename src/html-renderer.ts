@@ -66,7 +66,7 @@ export function renderHtmlPage(
   <title>${esc(title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho+B1:wght@700;800&display=swap" rel="stylesheet">
   <style>
     ${buildThemeCss()}
     *, *::before, *::after { box-sizing: border-box; }
@@ -74,10 +74,12 @@ export function renderHtmlPage(
       radial-gradient(circle at top, var(--accent-soft) 0%, transparent 36%),
       linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 100%);
       margin: 0; padding: 0; min-height: 100vh; line-height: 1.7; -webkit-font-smoothing: antialiased; }
-    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    @keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    ::selection { background: var(--accent); color: var(--bg); }
+    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; animation: pageIn 0.35s ease-out; }
 
     header { border-bottom: 3px double var(--border-strong); padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
-    header h1 { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; margin: 0 0 0.25rem; letter-spacing: 0.02em; }
+    header h1 { font-family: var(--serif); font-size: 2rem; font-weight: 800; margin: 0 0 0.25rem; letter-spacing: 0.08em; }
     header .date { font-size: 0.85rem; color: var(--ink-muted); }
     header .date a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--border-strong); transition: color 0.15s, border-color 0.15s; }
     header .date a:hover { color: var(--accent); border-color: var(--accent); }
@@ -118,19 +120,21 @@ export function renderHtmlPage(
     .article-summary { display: block; font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.15rem; }
 
     .entries { display: flex; flex-direction: column; gap: 0; }
-    article { padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+    article { padding: 1.25rem 0 1.25rem 0.75rem; border-bottom: 1px solid var(--border); border-left: 2px solid transparent; transition: border-left-color 0.2s ease; }
+    article:hover { border-left-color: var(--accent); }
     article:first-child { padding-top: 0; }
     article h3 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; line-height: 1.5; }
-    article h3 a { color: var(--ink); text-decoration: none; transition: color 0.15s; }
-    article h3 a:hover { color: var(--accent); }
+    article h3 a { color: var(--ink); text-decoration: none; background: linear-gradient(var(--accent), var(--accent)) 0 100% / 0 1px no-repeat; transition: color 0.2s, background-size 0.3s ease; }
+    article h3 a:hover { color: var(--accent); background-size: 100% 1px; }
     .meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
-    .users { font-size: 0.78rem; font-weight: 700; color: var(--accent); }
+    .users { font-size: 0.72rem; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 0.1rem 0.4rem; border-radius: 2px; }
     .domain { font-size: 0.78rem; color: var(--ink-muted); }
     article p { font-size: 0.88rem; color: var(--ink-light); margin: 0.4rem 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
-    .tags span { font-size: 0.72rem; color: var(--ink-muted); background: var(--tag-bg); padding: 0.15rem 0.45rem; border-radius: 2px; }
+    .tags span { font-size: 0.72rem; color: var(--ink-muted); background: var(--tag-bg); padding: 0.15rem 0.45rem; border-radius: 3px; transition: background-color 0.15s, color 0.15s; cursor: default; }
+    .tags span:hover { background: var(--border); color: var(--ink-light); }
 
-    footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--ink-muted); text-align: center; }
+    footer { margin-top: 3rem; padding-top: 1rem; border-top: 3px double var(--border-strong); font-size: 0.75rem; color: var(--ink-muted); text-align: center; letter-spacing: 0.1em; }
   </style>
 </head>
 <body>
@@ -264,7 +268,7 @@ function buildThemeCss(): string {
       --summary-divider: #eee3d7;
       --success: #2f8f57;
       --shadow-soft: 0 10px 30px rgba(62, 39, 26, 0.08);
-      --serif: 'Noto Serif JP', serif;
+      --serif: 'Shippori Mincho B1', serif;
       --sans: 'Noto Sans JP', sans-serif;
     }
 
@@ -272,7 +276,7 @@ function buildThemeCss(): string {
       :root {
         --ink: #f3ece5;
         --ink-light: #d2c7ba;
-        --ink-muted: #ab9b8d;
+        --ink-muted: #b5a89c;
         --bg: #14110f;
         --bg-elevated: #1d1815;
         --bg-card: rgba(31, 24, 20, 0.92);
@@ -319,7 +323,7 @@ export function renderErrorPage(
   <title>hinichi — エラー</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho+B1:wght@700;800&display=swap" rel="stylesheet">
   <style>
     ${buildThemeCss()}
     *, *::before, *::after { box-sizing: border-box; }
@@ -327,9 +331,11 @@ export function renderErrorPage(
       radial-gradient(circle at top, var(--accent-soft) 0%, transparent 36%),
       linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 100%);
       margin: 0; padding: 0; min-height: 100vh; line-height: 1.7; -webkit-font-smoothing: antialiased; }
-    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    @keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    ::selection { background: var(--accent); color: var(--bg); }
+    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; animation: pageIn 0.35s ease-out; }
     header { border-bottom: 3px double var(--border-strong); padding-bottom: 1.25rem; margin-bottom: 2rem; }
-    header h1 { font-family: var(--serif); font-size: 1.75rem; margin: 0; }
+    header h1 { font-family: var(--serif); font-size: 2rem; font-weight: 800; margin: 0; letter-spacing: 0.08em; }
     .error-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); box-shadow: var(--shadow-soft); padding: 2rem; margin: 2rem 0; }
     .error-box h2 { font-family: var(--serif); font-size: 1.2rem; margin: 0 0 0.75rem; color: var(--accent); }
     .error-box p { color: var(--ink-light); line-height: 1.7; margin: 0 0 1rem; }
