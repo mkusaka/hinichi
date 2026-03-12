@@ -22,8 +22,8 @@ export function renderHtmlPage(
 
   const entriesHtml = entries
     .map(
-      (e) => `
-      <article>
+      (e, i) => `
+      <article style="--i:${i}">
         <h3><a href="${escapeAttr(e.url)}">${esc(e.title)}</a></h3>
         <div class="meta">
           <span class="users">${e.users} users</span>
@@ -66,78 +66,78 @@ export function renderHtmlPage(
   <title>${esc(title)}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700;900&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --ink: #1a1a1a;
-      --ink-light: #555;
-      --ink-muted: #888;
-      --bg: #fafaf8;
-      --bg-card: #fff;
-      --border: #e0ddd8;
-      --accent: #c0392b;
-      --accent-soft: #fdf2f0;
-      --tag-bg: #f0eeea;
-      --serif: 'Noto Serif JP', serif;
-      --sans: 'Noto Sans JP', sans-serif;
-    }
+    ${buildThemeCss()}
     *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; line-height: 1.7; -webkit-font-smoothing: antialiased; }
-    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    @keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    ::selection { background: var(--accent); color: #fff; }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; min-height: 100vh; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; animation: enter 0.5s ease-out; }
 
-    header { border-bottom: 3px double var(--border); padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
-    header h1 { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; margin: 0 0 0.25rem; letter-spacing: 0.02em; }
-    header .date { font-size: 0.85rem; color: var(--ink-muted); }
-    header .date a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--border); transition: color 0.15s, border-color 0.15s; }
-    header .date a:hover { color: var(--accent); border-color: var(--accent); }
+    header { text-align: center; padding: 1rem 0 2rem; margin-bottom: 2rem; position: relative; }
+    header::before { content: ''; position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 320px; height: 200px; background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+    header h1 { font-family: var(--serif); font-size: 3.2rem; font-weight: 900; margin: 0; letter-spacing: 0.25em; line-height: 1.2; position: relative; z-index: 1; }
+    header h1::after { content: ''; display: block; width: 2.5rem; height: 2px; background: var(--accent); margin: 0.6rem auto 0; }
+    .subtitle { display: block; font-family: var(--sans); font-weight: 400; font-size: 0.55rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--ink-muted); margin-top: 0.4rem; }
+    header .date { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.75rem; position: relative; z-index: 1; }
+    header .date a { color: inherit; text-decoration: none; transition: color 0.2s; }
+    header .date a:hover { color: var(--accent); }
 
-    .controls { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 2rem; }
-    .controls label { font-size: 0.8rem; color: var(--ink-muted); display: flex; flex-direction: column; gap: 0.25rem; }
-    .controls select, .controls input[type="date"] { font-family: var(--sans); font-size: 0.85rem; padding: 0.4rem 0.6rem; border: 1px solid var(--border); border-radius: 3px; background: var(--bg-card); color: var(--ink); cursor: pointer; }
-    .controls select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; padding-right: 1.5rem; }
-    .controls select:focus, .controls input[type="date"]:focus { outline: none; border-color: var(--accent); }
-    .feed-links { margin-left: auto; display: flex; gap: 0.5rem; align-items: center; }
-    .feed-links a { font-size: 0.85rem; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.4rem 0.6rem; transition: border-color 0.15s, color 0.15s; }
+    .controls { display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 2rem; background: var(--surface-blur); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem 1.25rem; box-shadow: var(--shadow-sm); }
+    .controls label { font-size: 0.72rem; color: var(--ink-muted); display: flex; flex-direction: column; gap: 0.3rem; letter-spacing: 0.04em; }
+    .controls select, .controls input[type="date"] { font-family: var(--sans); font-size: 0.82rem; padding: 0.45rem 0.75rem; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-card); color: var(--ink); cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+    .controls select { appearance: none; padding-right: 1.8rem; background-image: linear-gradient(45deg, transparent 50%, var(--ink-muted) 50%), linear-gradient(135deg, var(--ink-muted) 50%, transparent 50%); background-position: calc(100% - 1rem) calc(50% - 0.12rem), calc(100% - 0.7rem) calc(50% - 0.12rem); background-size: 0.28rem 0.28rem; background-repeat: no-repeat; }
+    .controls select:focus, .controls input[type="date"]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .feed-links { margin-left: auto; display: flex; gap: 0.4rem; align-items: center; }
+    .feed-links a { font-size: 0.78rem; color: var(--ink-muted); text-decoration: none; border: 1px solid var(--border); border-radius: 20px; padding: 0.4rem 0.7rem; background: var(--bg-card); transition: all 0.2s; }
     .feed-links a:hover { border-color: var(--accent); color: var(--accent); }
-    .revalidate-btn { font-family: var(--sans); font-size: 0.85rem; color: var(--ink-muted); background: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.4rem 0.6rem; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+    .revalidate-btn { font-family: var(--sans); font-size: 0.78rem; color: var(--ink-muted); background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 0.4rem 0.7rem; cursor: pointer; transition: all 0.2s; }
     .revalidate-btn:hover { border-color: var(--accent); color: var(--accent); }
     .revalidate-btn.loading { opacity: 0.5; pointer-events: none; }
 
-    .summary { background: var(--bg-card); border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 1.5rem 1.75rem; margin-bottom: 2.5rem; }
+    .summary { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 1.75rem 2rem; margin-bottom: 2.5rem; box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
+    .summary::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--accent) 0%, transparent 100%); }
     .summary-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.75rem; }
-    .summary-header h2 { font-family: var(--serif); font-size: 1.15rem; margin: 0; letter-spacing: 0.02em; }
-    .copy-btn { font-family: var(--sans); font-size: 0.75rem; color: var(--ink-muted); background: none; border: 1px solid var(--border); border-radius: 3px; padding: 0.25rem 0.6rem; cursor: pointer; transition: all 0.15s; }
-    .copy-btn:hover { border-color: var(--ink-light); color: var(--ink-light); }
-    .copy-btn.copied { border-color: #27ae60; color: #27ae60; }
-    .summary .overview { font-size: 0.95rem; line-height: 1.8; color: var(--ink-light); margin-bottom: 1.25rem; }
-    .summary h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); margin: 1.25rem 0 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    .summary-header h2 { font-family: var(--serif); font-size: 1.15rem; margin: 0; letter-spacing: 0.05em; }
+    .copy-btn { font-family: var(--sans); font-size: 0.72rem; color: var(--ink-muted); background: transparent; border: 1px solid var(--border); border-radius: 20px; padding: 0.25rem 0.65rem; cursor: pointer; transition: all 0.2s; }
+    .copy-btn:hover { border-color: var(--ink-secondary); color: var(--ink-secondary); }
+    .copy-btn.copied { border-color: var(--success); color: var(--success); }
+    .summary .overview { font-size: 0.92rem; line-height: 1.85; color: var(--ink-secondary); margin-bottom: 1.25rem; }
+    .summary h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-muted); margin: 1.25rem 0 0.75rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.4rem; }
     .summary ul { list-style: none; padding: 0; margin: 0; }
-    .summary li { padding: 0.5rem 0; border-bottom: 1px solid #f0eeea; line-height: 1.6; }
+    .summary li { padding: 0.5rem 0; border-bottom: 1px solid var(--border-subtle); line-height: 1.6; }
     .summary li:last-child { border-bottom: none; }
-    .summary li a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 0.9rem; }
+    .summary li a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 0.88rem; transition: color 0.15s; }
     .summary li a:hover { color: var(--accent); }
-    .article-summary { display: block; font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.15rem; }
+    .article-summary { display: block; font-size: 0.8rem; color: var(--ink-muted); margin-top: 0.15rem; }
 
-    .entries { display: flex; flex-direction: column; gap: 0; }
-    article { padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
-    article:first-child { padding-top: 0; }
-    article h3 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; margin: 0 0 0.4rem; line-height: 1.5; }
-    article h3 a { color: var(--ink); text-decoration: none; transition: color 0.15s; }
+    .entries { display: flex; flex-direction: column; gap: 0.75rem; }
+    article { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.25rem 1.5rem; box-shadow: var(--shadow-sm); transition: transform 0.2s ease, box-shadow 0.2s ease; animation: enter 0.4s ease-out both; animation-delay: calc(0.03s * var(--i, 0)); }
+    article:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    article h3 { font-family: var(--serif); font-size: 1.02rem; font-weight: 700; margin: 0 0 0.4rem; line-height: 1.55; }
+    article h3 a { color: var(--ink); text-decoration: none; transition: color 0.2s; }
     article h3 a:hover { color: var(--accent); }
-    .meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
-    .users { font-size: 0.78rem; font-weight: 700; color: var(--accent); }
-    .domain { font-size: 0.78rem; color: var(--ink-muted); }
-    article p { font-size: 0.88rem; color: var(--ink-light); margin: 0.4rem 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .meta { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; flex-wrap: wrap; }
+    .users { font-size: 0.7rem; font-weight: 700; color: var(--accent); background: var(--accent-badge); padding: 0.12rem 0.5rem; border-radius: 20px; letter-spacing: 0.02em; }
+    .domain { font-size: 0.75rem; color: var(--ink-muted); }
+    article p { font-size: 0.85rem; color: var(--ink-secondary); margin: 0.35rem 0 0; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
-    .tags span { font-size: 0.72rem; color: var(--ink-muted); background: var(--tag-bg); padding: 0.15rem 0.45rem; border-radius: 2px; }
+    .tags span { font-size: 0.68rem; color: var(--ink-muted); background: var(--tag-bg); border: 1px solid var(--tag-border); padding: 0.12rem 0.5rem; border-radius: 20px; transition: all 0.15s; cursor: default; }
+    .tags span:hover { background: var(--tag-hover-bg); color: var(--ink-secondary); }
 
-    footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.75rem; color: var(--ink-muted); text-align: center; }
+    footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle); font-size: 0.7rem; color: var(--ink-muted); text-align: center; letter-spacing: 0.12em; }
+
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>日日 <span style="font-family: var(--sans); font-weight: 400; font-size: 0.6em; color: var(--ink-muted);">hinichi</span></h1>
+      <h1>日日<span class="subtitle">hinichi</span></h1>
       <div class="date"><a href="${escapeAttr(hotentryUrl)}">${esc(label)} — ${esc(dateStr)}</a></div>
     </header>
     <div class="controls">
@@ -246,6 +246,71 @@ function buildCopyText(summary: AISummaryResult): string {
   return lines.join("\n");
 }
 
+function buildThemeCss(): string {
+  return `
+    :root {
+      color-scheme: light dark;
+
+      --ink: #111;
+      --ink-secondary: #444;
+      --ink-muted: #6b6560;
+
+      --bg: #f5f2ed;
+      --bg-card: rgba(255, 255, 255, 0.88);
+      --bg-elevated: #faf8f5;
+      --surface-blur: rgba(245, 242, 237, 0.72);
+
+      --border: #e0dbd3;
+      --border-subtle: #eae6df;
+
+      --accent: #c23b22;
+      --accent-glow: rgba(194, 59, 34, 0.1);
+      --accent-badge: rgba(194, 59, 34, 0.1);
+
+      --tag-bg: transparent;
+      --tag-border: #d4cfc7;
+      --tag-hover-bg: #eae6df;
+
+      --success: #2d8a4e;
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
+
+      --serif: 'Zen Old Mincho', serif;
+      --sans: 'Zen Kaku Gothic New', sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #e8e0d6;
+        --ink-secondary: #b8ae9f;
+        --ink-muted: #948a7e;
+
+        --bg: #0e0c0a;
+        --bg-card: rgba(26, 22, 18, 0.9);
+        --bg-elevated: #161310;
+        --surface-blur: rgba(14, 12, 10, 0.78);
+
+        --border: #2e2820;
+        --border-subtle: #241f1a;
+
+        --accent: #e8725c;
+        --accent-glow: rgba(232, 114, 92, 0.14);
+        --accent-badge: rgba(232, 114, 92, 0.16);
+
+        --tag-bg: transparent;
+        --tag-border: #3a3228;
+        --tag-hover-bg: #2e2820;
+
+        --success: #62c87a;
+
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+      }
+    }
+  `;
+}
+
 interface ErrorPageOptions {
   details?: string[];
   linkHref?: string;
@@ -275,25 +340,31 @@ export function renderErrorPage(
   <title>hinichi — エラー</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Zen+Old+Mincho:wght@700;900&display=swap" rel="stylesheet">
   <style>
-    :root { --ink: #1a1a1a; --ink-muted: #888; --bg: #fafaf8; --border: #e0ddd8; --accent: #c0392b; --serif: 'Noto Serif JP', serif; --sans: 'Noto Sans JP', sans-serif; }
+    ${buildThemeCss()}
     *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; line-height: 1.7; -webkit-font-smoothing: antialiased; }
-    .container { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-    header { border-bottom: 3px double var(--border); padding-bottom: 1.25rem; margin-bottom: 2rem; }
-    header h1 { font-family: var(--serif); font-size: 1.75rem; margin: 0; }
-    .error-box { border: 1px solid var(--border); border-left: 4px solid var(--accent); padding: 2rem; margin: 2rem 0; }
-    .error-box h2 { font-family: var(--serif); font-size: 1.2rem; margin: 0 0 0.75rem; color: var(--accent); }
-    .error-box p { color: var(--ink-muted); line-height: 1.7; margin: 0 0 1rem; }
-    .error-box a { color: var(--accent); text-decoration: none; }
-    .error-box a:hover { text-decoration: underline; }
+    @keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    ::selection { background: var(--accent); color: #fff; }
+    body { font-family: var(--sans); color: var(--ink); background: var(--bg); margin: 0; padding: 0; min-height: 100vh; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; animation: enter 0.5s ease-out; }
+    header { text-align: center; padding: 1rem 0 2rem; margin-bottom: 2rem; position: relative; }
+    header::before { content: ''; position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 320px; height: 200px; background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+    header h1 { font-family: var(--serif); font-size: 3.2rem; font-weight: 900; margin: 0; letter-spacing: 0.25em; line-height: 1.2; position: relative; z-index: 1; }
+    header h1::after { content: ''; display: block; width: 2.5rem; height: 2px; background: var(--accent); margin: 0.6rem auto 0; }
+    .subtitle { display: block; font-family: var(--sans); font-weight: 400; font-size: 0.55rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--ink-muted); margin-top: 0.4rem; }
+    .error-box { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 2rem; margin: 2rem 0; box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
+    .error-box::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--accent) 0%, transparent 100%); }
+    .error-box h2 { font-family: var(--serif); font-size: 1.15rem; margin: 0 0 0.75rem; color: var(--accent); }
+    .error-box p { color: var(--ink-secondary); line-height: 1.7; margin: 0 0 1rem; }
+    .error-box a { color: var(--accent); text-decoration: none; transition: opacity 0.15s; }
+    .error-box a:hover { opacity: 0.75; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>日日 <span style="font-family: var(--sans); font-weight: 400; font-size: 0.6em; color: var(--ink-muted);">hinichi</span></h1>
+      <h1>日日<span class="subtitle">hinichi</span></h1>
     </header>
     <div class="error-box">
       <h2>${esc(message)}</h2>
