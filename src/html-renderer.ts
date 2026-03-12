@@ -554,6 +554,7 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 .card-rank {
   position: absolute;
@@ -578,7 +579,7 @@ body {
   transform: scale(1.05);
   filter: url(#chromatic);
 }
-.card-body { padding: 1.5rem 2rem 2rem; flex: 1 }
+.card-body { padding: 1.5rem 2rem 2rem; flex: 1; min-width: 0; overflow-wrap: break-word; word-break: break-word }
 .card h2 {
   font-family: var(--font-display);
   font-size: 1.15rem;
