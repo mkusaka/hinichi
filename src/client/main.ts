@@ -9,9 +9,7 @@ import { initNavigation } from "./navigation";
  */
 async function main() {
   // WebGPU/WebGL shader background (Three.js)
-  const backgroundCanvas = document.getElementById(
-    "voidBg",
-  ) as HTMLCanvasElement | null;
+  const backgroundCanvas = document.getElementById("voidBg") as HTMLCanvasElement | null;
   if (backgroundCanvas) {
     try {
       await initBackground(backgroundCanvas);

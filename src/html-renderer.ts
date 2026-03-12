@@ -21,7 +21,10 @@ export function renderHtmlPage(
 
   const summarySection = options.summary ? buildSummarySection(options.summary) : "";
   const hero = entries.length > 0 ? buildHero(entries[0], maxUsers) : "";
-  const feed = entries.slice(1).map((e, i) => buildEntry(e, i, maxUsers)).join("\n");
+  const feed = entries
+    .slice(1)
+    .map((e, i) => buildEntry(e, i, maxUsers))
+    .join("\n");
 
   const catOpts = CATEGORIES.map(
     (c) =>
@@ -93,9 +96,7 @@ ${summarySection}
 
 function buildHero(e: HatenaEntry, maxUsers: number): string {
   const pct = Math.round((e.users / maxUsers) * 100);
-  const bg = e.imageUrl
-    ? ` style="background-image:url(${escapeAttr(e.imageUrl)})"`
-    : "";
+  const bg = e.imageUrl ? ` style="background-image:url(${escapeAttr(e.imageUrl)})"` : "";
   const tags =
     e.tags.length > 0
       ? `<div class="tags">${e.tags.map((t) => `<span>#${esc(t)}</span>`).join("")}</div>`

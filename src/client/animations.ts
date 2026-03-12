@@ -42,8 +42,7 @@ export function initAnimations(): void {
   }
 
   // Scroll progress bar
-  const progressBar =
-    document.querySelector<HTMLElement>(".progress-bar");
+  const progressBar = document.querySelector<HTMLElement>(".progress-bar");
   if (progressBar) {
     gsap.to(progressBar, {
       scrollTrigger: {

@@ -3,18 +3,10 @@
  * and the revalidate button to URL changes.
  */
 export function initNavigation(): void {
-  const categorySelect = document.getElementById(
-    "sel-category",
-  ) as HTMLSelectElement | null;
-  const dateInput = document.getElementById(
-    "sel-date",
-  ) as HTMLInputElement | null;
-  const formatSelect = document.getElementById(
-    "sel-format",
-  ) as HTMLSelectElement | null;
-  const summarySelect = document.getElementById(
-    "sel-summary",
-  ) as HTMLSelectElement | null;
+  const categorySelect = document.getElementById("sel-category") as HTMLSelectElement | null;
+  const dateInput = document.getElementById("sel-date") as HTMLInputElement | null;
+  const formatSelect = document.getElementById("sel-format") as HTMLSelectElement | null;
+  const summarySelect = document.getElementById("sel-summary") as HTMLSelectElement | null;
   const revalidateButton = document.getElementById("btn-revalidate");
 
   if (!categorySelect || !dateInput || !formatSelect || !summarySelect) return;
