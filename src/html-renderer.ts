@@ -439,17 +439,17 @@ body {
 }
 .splash-brand {
   position: absolute;
-  top: 50%; left: 50%;
+  top: 40%; left: 50%;
   transform: translate(-50%, -50%);
   font-family: var(--font-display);
   font-size: clamp(6rem, 22vw, 20rem);
   font-weight: 800;
   color: #fff;
-  mix-blend-mode: difference;
+  opacity: 0.12;
   pointer-events: none; user-select: none;
   white-space: nowrap;
   letter-spacing: -0.03em;
-  z-index: 3;
+  z-index: 1;
 }
 .splash-rank {
   font-family: var(--font-display);
