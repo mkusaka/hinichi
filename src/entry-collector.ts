@@ -12,7 +12,7 @@ import type { HatenaEntry } from "./types";
  *   .entrylist-contents-description > p (説明文)
  *   .entrylist-contents-date (カテゴリ・日時)
  *   .entrylist-contents-tags > a (タグ)
- *   .entrylist-contents-thumb > a > img[src] (サムネイル)
+ *   .entrylist-contents-thumb > span[style="background-image:url(...)"] (サムネイル)
  */
 export class EntryCollector {
   readonly entries: HatenaEntry[] = [];
@@ -256,6 +256,16 @@ export class ImageHandler implements HTMLRewriterElementContentHandlers {
   constructor(private readonly collector: EntryCollector) {}
 
   element(e: Element) {
+    // Hatena uses <span style="background-image:url('...')"> for thumbnails
+    const style = e.getAttribute("style");
+    if (style) {
+      const match = style.match(/background-image:\s*url\(['"]?([^'")\s]+)['"]?\)/);
+      if (match?.[1]) {
+        this.collector.setImageUrl(match[1]);
+        return;
+      }
+    }
+    // Fallback: check for img src attribute
     const src = e.getAttribute("src");
     if (src) {
       this.collector.setImageUrl(src);
@@ -286,6 +296,7 @@ export async function extractEntries(response: Response): Promise<HatenaEntry[]>
     .on(".entrylist-contents-description", new DescriptionHandler(collector))
     .on(".entrylist-contents-date", new DateHandler(collector))
     .on(".entrylist-contents-tags a", new TagHandler(collector))
+    .on(".entrylist-contents-thumb span", new ImageHandler(collector))
     .on(".entrylist-contents-thumb img", new ImageHandler(collector));
 
   const transformed = rewriter.transform(response);

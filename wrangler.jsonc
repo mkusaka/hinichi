@@ -4,7 +4,13 @@
   "compatibility_date": "2025-12-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/index.ts",
+  "build": {
+    "command": "pnpm run build:client"
+  },
   "kv_namespaces": [
     { "binding": "CACHE_KV", "id": "d0a640306e31443c89b459ccd14d8a3f" }
-  ]
+  ],
+  "assets": {
+    "directory": "./public"
+  }
 }
