@@ -4,7 +4,8 @@
   "packageManager": "pnpm@10.30.3",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:client": "vite build --config vite.client.config.ts",
+    "build": "$npm_execpath run build:client && vite build",
     "preview": "$npm_execpath run build && vite preview",
     "deploy": "$npm_execpath run build && wrangler deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
@@ -18,7 +19,9 @@
     "@hono/zod-validator": "^0.7.6",
     "ai": "^6.0.79",
     "feed": "^5.2.0",
+    "gsap": "^3.14.2",
     "hono": "^4.11.9",
+    "three": "^0.183.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {

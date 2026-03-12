@@ -6,5 +6,8 @@
   "main": "./src/index.ts",
   "kv_namespaces": [
     { "binding": "CACHE_KV", "id": "d0a640306e31443c89b459ccd14d8a3f" }
-  ]
+  ],
+  "assets": {
+    "directory": "./public"
+  }
 }

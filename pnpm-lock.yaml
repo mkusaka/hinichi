@@ -20,9 +20,15 @@ importers:
       feed:
         specifier: ^5.2.0
         version: 5.2.0
+      gsap:
+        specifier: ^3.14.2
+        version: 3.14.2
       hono:
         specifier: ^4.11.9
         version: 4.12.5
+      three:
+        specifier: ^0.183.2
+        version: 0.183.2
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -1012,6 +1018,9 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
+  gsap@3.14.2:
+    resolution: {integrity: sha512-P8/mMxVLU7o4+55+1TCnQrPmgjPKnwkzkXOK1asnR9Jg2lna4tEY5qBJjMmAaOBDDZWtlRjBXjLa0w53G/uBLA==}
+
   hono@4.12.5:
     resolution: {integrity: sha512-3qq+FUBtlTHhtYxbxheZgY8NIFnkkC/MR8u5TTsr7YZ3wixryQ3cCwn3iZbg8p8B88iDBBAYSfZDS75t8MN7Vg==}
     engines: {node: '>=16.9.0'}
@@ -1118,6 +1127,9 @@ packages:
   supports-color@10.2.2:
     resolution: {integrity: sha512-SS+jx45GF1QjgEXQx4NJZV9ImqmO2NPz5FNsIHrsDjh2YsHnawpan7SNQ1o8NuhrbHZy9AZhIoCUiCeaW/C80g==}
     engines: {node: '>=18'}
+
+  three@0.183.2:
+    resolution: {integrity: sha512-di3BsL2FEQ1PA7Hcvn4fyJOlxRRgFYBpMTcyOgkwJIaDOdJMebEFPA+t98EvjuljDx4hNulAGwF6KIjtwI5jgQ==}
 
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
@@ -1903,6 +1915,8 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
+  gsap@3.14.2: {}
+
   hono@4.12.5: {}
 
   js-tokens@9.0.1: {}
@@ -2074,6 +2088,8 @@ snapshots:
       js-tokens: 9.0.1
 
   supports-color@10.2.2: {}
+
+  three@0.183.2: {}
 
   tinybench@2.9.0: {}
 
