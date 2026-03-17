@@ -13,7 +13,7 @@ importers:
         version: 3.0.43(zod@4.3.6)
       '@hono/zod-validator':
         specifier: ^0.7.6
-        version: 0.7.6(hono@4.12.5)(zod@4.3.6)
+        version: 0.7.6(hono@4.12.6)(zod@4.3.6)
       ai:
         specifier: ^6.0.79
         version: 6.0.116(zod@4.3.6)
@@ -25,7 +25,7 @@ importers:
         version: 3.14.2
       hono:
         specifier: ^4.11.9
-        version: 4.12.5
+        version: 4.12.6
       three:
         specifier: ^0.183.2
         version: 0.183.2
@@ -1021,8 +1021,8 @@ packages:
   gsap@3.14.2:
     resolution: {integrity: sha512-P8/mMxVLU7o4+55+1TCnQrPmgjPKnwkzkXOK1asnR9Jg2lna4tEY5qBJjMmAaOBDDZWtlRjBXjLa0w53G/uBLA==}
 
-  hono@4.12.5:
-    resolution: {integrity: sha512-3qq+FUBtlTHhtYxbxheZgY8NIFnkkC/MR8u5TTsr7YZ3wixryQ3cCwn3iZbg8p8B88iDBBAYSfZDS75t8MN7Vg==}
+  hono@4.12.6:
+    resolution: {integrity: sha512-KljEp+MeEEEIOT75qBo1UjqqB29fRMtlDEwCxcexOzdkUq6LR/vRvHk5pdROcxyOYyW1niq7Gb5pFVGy5R1eBw==}
     engines: {node: '>=16.9.0'}
 
   js-tokens@9.0.1:
@@ -1455,9 +1455,9 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@hono/zod-validator@0.7.6(hono@4.12.5)(zod@4.3.6)':
+  '@hono/zod-validator@0.7.6(hono@4.12.6)(zod@4.3.6)':
     dependencies:
-      hono: 4.12.5
+      hono: 4.12.6
       zod: 4.3.6
 
   '@img/colour@1.1.0': {}
@@ -1917,7 +1917,7 @@ snapshots:
 
   gsap@3.14.2: {}
 
-  hono@4.12.5: {}
+  hono@4.12.6: {}
 
   js-tokens@9.0.1: {}
 
