@@ -5,7 +5,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { extractEntries } from "./entry-collector";
 import { fetchArticleContents, type ArticleContent } from "./article-fetcher";
-import { generateFeed } from "./feed-generator";
+import { generateFeed, getStableFeedUpdated, getStableSummaryDate } from "./feed-generator";
 import { renderHtmlPage, renderErrorPage } from "./html-renderer";
 import {
   CATEGORIES,
@@ -121,6 +121,39 @@ function buildDataCacheKey(
 
 function buildKvKey(kind: DataCacheKind, category: string, date: string): string {
   return `v${DATA_CACHE_VERSION}:${kind}:${category}:${date}`;
+}
+
+function buildFeedIdentityUrl(
+  baseUrl: string,
+  category: string,
+  requestedDate?: string,
+  summaryParam?: string,
+): string {
+  const url = new URL(`/${category}`, baseUrl);
+  if (requestedDate) url.searchParams.set("date", requestedDate);
+  if (summaryParam) url.searchParams.set("summary", summaryParam);
+  return url.toString();
+}
+
+function buildFeedLinks(
+  baseUrl: string,
+  category: string,
+  requestedDate?: string,
+  summaryParam?: string,
+): Record<"rss" | "atom" | "json", string> {
+  const buildVariantUrl = (format: "rss" | "atom" | "json"): string => {
+    const url = new URL(`/${category}`, baseUrl);
+    url.searchParams.set("format", format);
+    if (requestedDate) url.searchParams.set("date", requestedDate);
+    if (summaryParam) url.searchParams.set("summary", summaryParam);
+    return url.toString();
+  };
+
+  return {
+    rss: buildVariantUrl("rss"),
+    atom: buildVariantUrl("atom"),
+    json: buildVariantUrl("json"),
+  };
 }
 
 interface DataCache {
@@ -385,9 +418,22 @@ app.get(
         }),
       );
     } else {
+      const feedLinks = buildFeedLinks(baseUrl, category, date, summaryParam);
+      const feedId = buildFeedIdentityUrl(baseUrl, category, date, summaryParam);
+      const stableSummaryDate = getStableSummaryDate(effectiveDate);
+      const summaryDate = aiSummary ? stableSummaryDate : undefined;
+      const feedUpdated = summaryDate ?? getStableFeedUpdated(entries, displayDate);
       const feed = summaryOnly
-        ? generateFeed([], category, displayDate, baseUrl)
-        : generateFeed(entries, category, displayDate, baseUrl);
+        ? generateFeed([], category, displayDate, baseUrl, {
+            feedId,
+            feedLinks,
+            updated: feedUpdated,
+          })
+        : generateFeed(entries, category, displayDate, baseUrl, {
+            feedId,
+            feedLinks,
+            updated: feedUpdated,
+          });
 
       if (aiSummary) {
         const summaryHtml = buildSummaryHtml(aiSummary);
@@ -397,7 +443,7 @@ app.get(
           link: `${baseUrl}/${category}?format=html&summary=ai&date=${effectiveDate}`,
           description: aiSummary.overview,
           content: summaryHtml,
-          date: new Date(),
+          date: stableSummaryDate,
         });
       }
 
@@ -476,7 +522,8 @@ function buildErrorResponse(
     });
   }
 
-  const feed = generateFeed([], category, dateStr, "");
+  const errorDate = getStableSummaryDate(dateStr);
+  const feed = generateFeed([], category, dateStr, "", { updated: errorDate });
   feed.addItem({
     title: message,
     id: `error-${category}-${dateStr}`,
@@ -484,7 +531,7 @@ function buildErrorResponse(
     description: options.details?.length
       ? `${CATEGORY_LABELS[category]} (${dateStr}): ${message}\n${options.details.join(" / ")}`
       : `${CATEGORY_LABELS[category]} (${dateStr}): ${message}`,
-    date: new Date(),
+    date: errorDate,
   });
 
   const contentType =
