@@ -2,28 +2,40 @@ import { Feed } from "feed";
 import type { HatenaEntry, Category } from "./types";
 import { CATEGORY_LABELS } from "./types";
 
+type FeedOutputFormat = "atom" | "rss" | "json";
+
+interface FeedOptions {
+  feedId?: string;
+  feedLinks?: Partial<Record<FeedOutputFormat, string>>;
+  updated?: Date;
+}
+
 export function generateFeed(
   entries: HatenaEntry[],
   category: Category,
   dateStr: string,
   baseUrl: string,
+  options: FeedOptions = {},
 ): Feed {
   const label = CATEGORY_LABELS[category];
-  const feedUrl = `${baseUrl}/${category}`;
+  const defaultFeedUrl = `${baseUrl}/${category}`;
+  const feedId = options.feedId ?? defaultFeedUrl;
+  const feedLinks = {
+    atom: `${defaultFeedUrl}?format=atom`,
+    rss: `${defaultFeedUrl}?format=rss`,
+    json: `${defaultFeedUrl}?format=json`,
+    ...options.feedLinks,
+  };
 
   const feed = new Feed({
     title: `はてなブックマーク - ${label} - ${dateStr}`,
     description: `はてなブックマーク ${label} カテゴリの人気エントリー（${dateStr}）`,
-    id: feedUrl,
+    id: feedId,
     link: `https://b.hatena.ne.jp/hotentry/${category}/${dateStr.replace(/-/g, "")}`,
     language: "ja",
-    updated: new Date(),
+    updated: options.updated ?? getStableFeedUpdated(entries, dateStr),
     generator: "hinichi",
-    feedLinks: {
-      atom: `${feedUrl}?format=atom`,
-      rss: `${feedUrl}?format=rss`,
-      json: `${feedUrl}?format=json`,
-    },
+    feedLinks,
   });
 
   for (const entry of entries) {
@@ -40,6 +52,22 @@ export function generateFeed(
   }
 
   return feed;
+}
+
+export function getStableFeedUpdated(entries: HatenaEntry[], fallbackDateStr: string): Date {
+  const latestEntryDate = entries
+    .map((entry) => parseEntryDate(entry.date, fallbackDateStr))
+    .reduce<Date | null>((latest, current) => {
+      if (!latest || current.getTime() > latest.getTime()) return current;
+      return latest;
+    }, null);
+
+  return latestEntryDate ?? getStableSummaryDate(fallbackDateStr);
+}
+
+export function getStableSummaryDate(dateStr: string): Date {
+  const normalized = normalizeDateString(dateStr);
+  return new Date(`${normalized}T23:59:59+09:00`);
 }
 
 function buildContentEncoded(entry: HatenaEntry): string {
@@ -87,8 +115,12 @@ function parseEntryDate(dateField: string, fallbackDateStr: string): Date {
     if (!isNaN(jstDate.getTime())) return jstDate;
   }
   // フォールバック: dateStr (YYYY-MM-DD or YYYYMMDD) を使う
-  const normalized = fallbackDateStr.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+  const normalized = normalizeDateString(fallbackDateStr);
   return new Date(`${normalized}T00:00:00+09:00`);
+}
+
+function normalizeDateString(dateStr: string): string {
+  return dateStr.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
 }
 
 function escapeHtml(str: string): string {
