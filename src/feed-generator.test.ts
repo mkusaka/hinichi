@@ -35,9 +35,7 @@ describe("feed-generator", () => {
 
   it("builds a stable end-of-day JST timestamp for summary items", () => {
     expect(getStableSummaryDate("20260210").toUTCString()).toBe("Tue, 10 Feb 2026 14:59:59 GMT");
-    expect(getStableSummaryDate("2026-02-10").toUTCString()).toBe(
-      "Tue, 10 Feb 2026 14:59:59 GMT",
-    );
+    expect(getStableSummaryDate("2026-02-10").toUTCString()).toBe("Tue, 10 Feb 2026 14:59:59 GMT");
   });
 
   it("preserves feed variant links for dated summary feeds", () => {
@@ -56,6 +54,8 @@ describe("feed-generator", () => {
     );
     const json = JSON.parse(feed.json1()) as { feed_url: string; id: string };
     expect(json.feed_url).toBe("https://hinichi.example/it?format=json&date=20260210&summary=ai");
-    expect(feed.atom1()).toContain("<id>https://hinichi.example/it?date=20260210&amp;summary=ai</id>");
+    expect(feed.atom1()).toContain(
+      "<id>https://hinichi.example/it?date=20260210&amp;summary=ai</id>",
+    );
   });
 });
