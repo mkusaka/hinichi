@@ -33,7 +33,7 @@
     "oxfmt": "0.37.0",
     "oxlint": "1.52.0",
     "typescript": "5.9.3",
-    "vite": "7.3.1",
+    "vite": "8.0.0",
     "vitest": "3.2.4",
     "wrangler": "4.72.0"
   }
