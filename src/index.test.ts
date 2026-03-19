@@ -26,15 +26,10 @@ const CACHE_CATEGORIES = [
 ] as const;
 const mockedFetch = vi.fn(async (input: Request | URL | string) => {
   const url = new URL(
-    typeof input === "string"
-      ? input
-      : input instanceof URL
-        ? input.toString()
-        : input.url,
+    typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url,
   );
   const interceptIndex = pendingInterceptors.findIndex(
-    (interceptor) =>
-      interceptor.origin === url.origin && interceptor.path === url.pathname,
+    (interceptor) => interceptor.origin === url.origin && interceptor.path === url.pathname,
   );
 
   if (interceptIndex === -1) {
@@ -58,11 +53,7 @@ const fetchMock = {
     return {
       intercept({ path }: { path: string }) {
         return {
-          reply(
-            status: number,
-            body: BodyInit | null,
-            options?: { headers?: HeadersInit },
-          ) {
+          reply(status: number, body: BodyInit | null, options?: { headers?: HeadersInit }) {
             pendingInterceptors.push({
               origin,
               path,
@@ -91,10 +82,9 @@ beforeEach(async () => {
     CACHE_CATEGORIES.flatMap((category) =>
       [0, 1, 2].map((offset) => {
         const date = String(Number(CACHE_TEST_DATE) - offset);
-        return SELF.fetch(
-          `http://localhost/${category}?format=json&date=${date}&revalidate=true`,
-          { redirect: "manual" },
-        );
+        return SELF.fetch(`http://localhost/${category}?format=json&date=${date}&revalidate=true`, {
+          redirect: "manual",
+        });
       }),
     ),
   );
