@@ -1,14 +1,112 @@
-import { SELF, fetchMock } from "cloudflare:test";
-import { describe, it, expect, beforeAll, afterEach } from "vitest";
+import { SELF } from "cloudflare:test";
+import { describe, it, expect, beforeAll, beforeEach, afterAll, afterEach, vi } from "vitest";
 import app from "./index";
 
+type PendingInterceptor = {
+  origin: string;
+  path: string;
+  status: number;
+  body: BodyInit | null;
+  headers?: HeadersInit;
+};
+
+const pendingInterceptors: PendingInterceptor[] = [];
+const CACHE_TEST_DATE = "20260210";
+const CACHE_CATEGORIES = [
+  "all",
+  "general",
+  "social",
+  "economics",
+  "life",
+  "knowledge",
+  "it",
+  "fun",
+  "entertainment",
+  "game",
+] as const;
+const mockedFetch = vi.fn(async (input: Request | URL | string) => {
+  const url = new URL(
+    typeof input === "string"
+      ? input
+      : input instanceof URL
+        ? input.toString()
+        : input.url,
+  );
+  const interceptIndex = pendingInterceptors.findIndex(
+    (interceptor) =>
+      interceptor.origin === url.origin && interceptor.path === url.pathname,
+  );
+
+  if (interceptIndex === -1) {
+    if (url.origin === "https://b.hatena.ne.jp") {
+      return new Response("Not Found", { status: 404 });
+    }
+    throw new Error(`Unexpected fetch: ${url.toString()}`);
+  }
+
+  const [interceptor] = pendingInterceptors.splice(interceptIndex, 1);
+  return new Response(interceptor.body, {
+    status: interceptor.status,
+    headers: interceptor.headers,
+  });
+});
+
+const fetchMock = {
+  activate() {},
+  disableNetConnect() {},
+  get(origin: string) {
+    return {
+      intercept({ path }: { path: string }) {
+        return {
+          reply(
+            status: number,
+            body: BodyInit | null,
+            options?: { headers?: HeadersInit },
+          ) {
+            pendingInterceptors.push({
+              origin,
+              path,
+              status,
+              body,
+              headers: options?.headers,
+            });
+          },
+        };
+      },
+    };
+  },
+  assertNoPendingInterceptors() {
+    expect(pendingInterceptors).toHaveLength(0);
+  },
+};
+
 beforeAll(() => {
+  vi.stubGlobal("fetch", mockedFetch);
   fetchMock.activate();
   fetchMock.disableNetConnect();
 });
 
+beforeEach(async () => {
+  await Promise.all(
+    CACHE_CATEGORIES.flatMap((category) =>
+      [0, 1, 2].map((offset) => {
+        const date = String(Number(CACHE_TEST_DATE) - offset);
+        return SELF.fetch(
+          `http://localhost/${category}?format=json&date=${date}&revalidate=true`,
+          { redirect: "manual" },
+        );
+      }),
+    ),
+  );
+});
+
+afterAll(() => {
+  vi.unstubAllGlobals();
+});
+
 afterEach(() => {
-  fetchMock.assertNoPendingInterceptors();
+  pendingInterceptors.length = 0;
+  mockedFetch.mockClear();
 });
 
 const SAMPLE_HTML = `<!DOCTYPE html>
@@ -176,10 +274,10 @@ describe("GET /:category", () => {
   it("returns 502 when hatena returns error", async () => {
     fetchMock
       .get("https://b.hatena.ne.jp")
-      .intercept({ path: "/hotentry/it/20260210" })
+      .intercept({ path: "/hotentry/it/20260211" })
       .reply(500, "Internal Server Error");
 
-    const res = await SELF.fetch("http://localhost/it?format=rss&date=20260210");
+    const res = await SELF.fetch("http://localhost/it?format=rss&date=20260211");
     expect(res.status).toBe(502);
   });
 
