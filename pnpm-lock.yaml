@@ -35,10 +35,10 @@ importers:
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: 1.31.0
-        version: 1.31.0(vite@8.0.3(esbuild@0.27.3))(workerd@1.20260401.1)(wrangler@4.80.0(@cloudflare/workers-types@4.20260405.1))
+        version: 1.31.0(vite@8.0.5(esbuild@0.27.3))(workerd@1.20260401.1)(wrangler@4.80.0(@cloudflare/workers-types@4.20260405.1))
       '@cloudflare/vitest-pool-workers':
         specifier: 0.14.1
-        version: 0.14.1(@cloudflare/workers-types@4.20260405.1)(@vitest/runner@4.1.2)(@vitest/snapshot@4.1.2)(vitest@4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.3(esbuild@0.27.3)))
+        version: 0.14.1(@cloudflare/workers-types@4.20260405.1)(@vitest/runner@4.1.2)(@vitest/snapshot@4.1.2)(vitest@4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.5(esbuild@0.27.3)))
       '@cloudflare/workers-types':
         specifier: 4.20260405.1
         version: 4.20260405.1
@@ -58,11 +58,11 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       vite:
-        specifier: 8.0.3
-        version: 8.0.3(esbuild@0.27.3)
+        specifier: 8.0.5
+        version: 8.0.5(esbuild@0.27.3)
       vitest:
         specifier: 4.1.2
-        version: 4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.3(esbuild@0.27.3))
+        version: 4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.5(esbuild@0.27.3))
       wrangler:
         specifier: 4.80.0
         version: 4.80.0(@cloudflare/workers-types@4.20260405.1)
@@ -1183,14 +1183,14 @@ packages:
   unenv@2.0.0-rc.24:
     resolution: {integrity: sha512-i7qRCmY42zmCwnYlh9H2SvLEypEFGye5iRmEMKjcGi7zk9UquigRjFtTLz0TYqr0ZGLZhaMHl/foy1bZR+Cwlw==}
 
-  vite@8.0.3:
-    resolution: {integrity: sha512-B9ifbFudT1TFhfltfaIPgjo9Z3mDynBTJSUYxTjOQruf/zHH+ezCQKcoqO+h7a9Pw9Nm/OtlXAiGT1axBgwqrQ==}
+  vite@8.0.5:
+    resolution: {integrity: sha512-nmu43Qvq9UopTRfMx2jOYW5l16pb3iDC1JH6yMuPkpVbzK0k+L7dfsEDH4jRgYFmsg0sTAqkojoZgzLMlwHsCQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
       '@types/node': ^20.19.0 || >=22.12.0
       '@vitejs/devtools': ^0.1.0
-      esbuild: ^0.27.0
+      esbuild: ^0.27.0 || ^0.28.0
       jiti: '>=1.21.0'
       less: ^4.0.0
       sass: ^1.70.0
@@ -1343,12 +1343,12 @@ snapshots:
     optionalDependencies:
       workerd: 1.20260401.1
 
-  '@cloudflare/vite-plugin@1.31.0(vite@8.0.3(esbuild@0.27.3))(workerd@1.20260401.1)(wrangler@4.80.0(@cloudflare/workers-types@4.20260405.1))':
+  '@cloudflare/vite-plugin@1.31.0(vite@8.0.5(esbuild@0.27.3))(workerd@1.20260401.1)(wrangler@4.80.0(@cloudflare/workers-types@4.20260405.1))':
     dependencies:
       '@cloudflare/unenv-preset': 2.16.0(unenv@2.0.0-rc.24)(workerd@1.20260401.1)
       miniflare: 4.20260401.0
       unenv: 2.0.0-rc.24
-      vite: 8.0.3(esbuild@0.27.3)
+      vite: 8.0.5(esbuild@0.27.3)
       wrangler: 4.80.0(@cloudflare/workers-types@4.20260405.1)
       ws: 8.18.0
     transitivePeerDependencies:
@@ -1356,14 +1356,14 @@ snapshots:
       - utf-8-validate
       - workerd
 
-  '@cloudflare/vitest-pool-workers@0.14.1(@cloudflare/workers-types@4.20260405.1)(@vitest/runner@4.1.2)(@vitest/snapshot@4.1.2)(vitest@4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.3(esbuild@0.27.3)))':
+  '@cloudflare/vitest-pool-workers@0.14.1(@cloudflare/workers-types@4.20260405.1)(@vitest/runner@4.1.2)(@vitest/snapshot@4.1.2)(vitest@4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.5(esbuild@0.27.3)))':
     dependencies:
       '@vitest/runner': 4.1.2
       '@vitest/snapshot': 4.1.2
       cjs-module-lexer: 1.4.3
       esbuild: 0.27.3
       miniflare: 4.20260401.0
-      vitest: 4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.3(esbuild@0.27.3))
+      vitest: 4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.5(esbuild@0.27.3))
       wrangler: 4.80.0(@cloudflare/workers-types@4.20260405.1)
       zod: 3.25.76
     transitivePeerDependencies:
@@ -1813,13 +1813,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.2(vite@8.0.3(esbuild@0.27.3))':
+  '@vitest/mocker@4.1.2(vite@8.0.5(esbuild@0.27.3))':
     dependencies:
       '@vitest/spy': 4.1.2
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 8.0.3(esbuild@0.27.3)
+      vite: 8.0.5(esbuild@0.27.3)
 
   '@vitest/pretty-format@4.1.2':
     dependencies:
@@ -2148,7 +2148,7 @@ snapshots:
     dependencies:
       pathe: 2.0.3
 
-  vite@8.0.3(esbuild@0.27.3):
+  vite@8.0.5(esbuild@0.27.3):
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
@@ -2159,10 +2159,10 @@ snapshots:
       esbuild: 0.27.3
       fsevents: 2.3.3
 
-  vitest@4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.3(esbuild@0.27.3)):
+  vitest@4.1.2(@opentelemetry/api@1.9.0)(vite@8.0.5(esbuild@0.27.3)):
     dependencies:
       '@vitest/expect': 4.1.2
-      '@vitest/mocker': 4.1.2(vite@8.0.3(esbuild@0.27.3))
+      '@vitest/mocker': 4.1.2(vite@8.0.5(esbuild@0.27.3))
       '@vitest/pretty-format': 4.1.2
       '@vitest/runner': 4.1.2
       '@vitest/snapshot': 4.1.2
@@ -2179,7 +2179,7 @@ snapshots:
       tinyexec: 1.0.4
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vite: 8.0.3(esbuild@0.27.3)
+      vite: 8.0.5(esbuild@0.27.3)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
