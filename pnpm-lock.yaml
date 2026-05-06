@@ -16,7 +16,7 @@ importers:
         version: 0.7.6(hono@4.12.15)(zod@4.3.6)
       ai:
         specifier: ^6.0.79
-        version: 6.0.169(zod@4.3.6)
+        version: 6.0.170(zod@4.3.6)
       feed:
         specifier: ^5.2.0
         version: 5.2.1
@@ -907,8 +907,8 @@ packages:
   '@vitest/utils@4.1.5':
     resolution: {integrity: sha512-76wdkrmfXfqGjueGgnb45ITPyUi1ycZ4IHgC2bhPDUfWHklY/q3MdLOAB+TF1e6xfl8NxNY0ZYaPCFNWSsw3Ug==}
 
-  ai@6.0.169:
-    resolution: {integrity: sha512-eDAIc8bJJ3Ktk5qvBvWfAK7Uwj6zrOMI9VvQ6yLfF+7HdqnR0TSxgkLuIONrmowB2OujeAuVF9jalpNPJSN57g==}
+  ai@6.0.170:
+    resolution: {integrity: sha512-FWTKeGGDRcYJtPWIrdZDSuvOW5LCjI2NZUJmaml8OTOaPEsXnFdFvmawCXbT+wTGxyWKJTgZ9sZtCjbJsmjM2Q==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1856,7 +1856,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  ai@6.0.169(zod@4.3.6):
+  ai@6.0.170(zod@4.3.6):
     dependencies:
       '@ai-sdk/gateway': 3.0.105(zod@4.3.6)
       '@ai-sdk/provider': 3.0.9
