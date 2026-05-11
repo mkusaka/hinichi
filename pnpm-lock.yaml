@@ -10,13 +10,13 @@ importers:
     dependencies:
       '@ai-sdk/google':
         specifier: ^3.0.24
-        version: 3.0.67(zod@4.4.2)
+        version: 3.0.67(zod@4.4.3)
       '@hono/zod-validator':
         specifier: ^0.7.6
-        version: 0.7.6(hono@4.12.16)(zod@4.4.2)
+        version: 0.7.6(hono@4.12.16)(zod@4.4.3)
       ai:
         specifier: ^6.0.79
-        version: 6.0.174(zod@4.4.2)
+        version: 6.0.174(zod@4.4.3)
       feed:
         specifier: ^5.2.0
         version: 5.2.1
@@ -31,7 +31,7 @@ importers:
         version: 0.184.0
       zod:
         specifier: ^4.3.6
-        version: 4.4.2
+        version: 4.4.3
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: 1.35.0
@@ -1315,30 +1315,30 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.4.2:
-    resolution: {integrity: sha512-IynmDyxsEsb9RKzO3J9+4SxXnl2FTFSzNBaKKaMV6tsSk0rw9gYw9gs+JFCq/qk2LCZ78KDwyj+Z289TijSkUw==}
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
 
-  '@ai-sdk/gateway@3.0.109(zod@4.4.2)':
+  '@ai-sdk/gateway@3.0.109(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.2)
+      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.3)
       '@vercel/oidc': 3.2.0
-      zod: 4.4.2
+      zod: 4.4.3
 
-  '@ai-sdk/google@3.0.67(zod@4.4.2)':
+  '@ai-sdk/google@3.0.67(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.2)
-      zod: 4.4.2
+      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.3)
+      zod: 4.4.3
 
-  '@ai-sdk/provider-utils@4.0.26(zod@4.4.2)':
+  '@ai-sdk/provider-utils@4.0.26(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.0.8
-      zod: 4.4.2
+      zod: 4.4.3
 
   '@ai-sdk/provider@3.0.10':
     dependencies:
@@ -1495,10 +1495,10 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@hono/zod-validator@0.7.6(hono@4.12.16)(zod@4.4.2)':
+  '@hono/zod-validator@0.7.6(hono@4.12.16)(zod@4.4.3)':
     dependencies:
       hono: 4.12.16
-      zod: 4.4.2
+      zod: 4.4.3
 
   '@img/colour@1.1.0': {}
 
@@ -1856,13 +1856,13 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  ai@6.0.174(zod@4.4.2):
+  ai@6.0.174(zod@4.4.3):
     dependencies:
-      '@ai-sdk/gateway': 3.0.109(zod@4.4.2)
+      '@ai-sdk/gateway': 3.0.109(zod@4.4.3)
       '@ai-sdk/provider': 3.0.10
-      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.2)
+      '@ai-sdk/provider-utils': 4.0.26(zod@4.4.3)
       '@opentelemetry/api': 1.9.0
-      zod: 4.4.2
+      zod: 4.4.3
 
   assertion-error@2.0.1: {}
 
@@ -2248,4 +2248,4 @@ snapshots:
 
   zod@3.25.76: {}
 
-  zod@4.4.2: {}
+  zod@4.4.3: {}
