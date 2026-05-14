@@ -583,7 +583,7 @@ ${articleTexts}
   try {
     const google = createGoogleGenerativeAI({ apiKey });
     const { object } = await generateObject({
-      model: google("gemini-2.5-flash"),
+      model: google("gemini-3-flash-preview"),
       schema: aiSummarySchema,
       prompt,
     });
