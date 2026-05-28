@@ -25,16 +25,16 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.37.2",
-    "@cloudflare/vitest-pool-workers": "0.16.7",
-    "@cloudflare/workers-types": "4.20260520.1",
+    "@cloudflare/vite-plugin": "1.37.3",
+    "@cloudflare/vitest-pool-workers": "0.16.8",
+    "@cloudflare/workers-types": "4.20260521.1",
     "@vitest/runner": "4.1.7",
     "@vitest/snapshot": "4.1.7",
     "oxfmt": "0.51.0",
     "oxlint": "1.66.0",
     "typescript": "6.0.3",
-    "vite": "8.0.13",
+    "vite": "8.0.14",
     "vitest": "4.1.7",
-    "wrangler": "4.93.0"
+    "wrangler": "4.93.1"
   }
 }
