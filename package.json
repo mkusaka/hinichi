@@ -1,7 +1,7 @@
 {
   "name": "hinichi",
   "type": "module",
-  "packageManager": "pnpm@11.1.2",
+  "packageManager": "pnpm@11.5.2",
   "scripts": {
     "dev": "vite",
     "build:client": "vite build --config vite.client.config.ts",
