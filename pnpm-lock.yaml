@@ -13,10 +13,10 @@ importers:
         version: 3.0.80(zod@4.4.3)
       '@hono/zod-validator':
         specifier: ^0.8.0
-        version: 0.8.0(hono@4.12.23)(zod@4.4.3)
+        version: 0.8.0(hono@4.12.25)(zod@4.4.3)
       ai:
         specifier: ^6.0.79
-        version: 6.0.197(zod@4.4.3)
+        version: 6.0.199(zod@4.4.3)
       feed:
         specifier: ^5.2.0
         version: 5.2.1
@@ -25,7 +25,7 @@ importers:
         version: 3.15.0
       hono:
         specifier: ^4.11.9
-        version: 4.12.23
+        version: 4.12.25
       three:
         specifier: ^0.184.0
         version: 0.184.0
@@ -69,8 +69,8 @@ importers:
 
 packages:
 
-  '@ai-sdk/gateway@3.0.125':
-    resolution: {integrity: sha512-tocl7cUDoTpmhZqeW8XVKMMznZQwwQAEunF0VyNKmf64qt8NbMIAEiet/vRMzh7Jr9WcFeb6EZjmhLTP4Qx2Og==}
+  '@ai-sdk/gateway@3.0.127':
+    resolution: {integrity: sha512-Obmw5hmE5x+ccRrMp/Djx5r0rpFVX87YqE6OY06g5fwYlRI30dA84ARfTzX45ivCvkW4eCnBpOVXVWQ/pjH85w==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -908,8 +908,8 @@ packages:
   '@vitest/utils@4.1.8':
     resolution: {integrity: sha512-uOJamYALNhfJ6iolExyQM40yIQwDqYnkKtQ5VCiSe17E33H0aQ/u+1GlRuz4LZBk6Mm3sg90G9hEbmEt37C1Zg==}
 
-  ai@6.0.197:
-    resolution: {integrity: sha512-U3KsjkqwQXGHC0u0VeUDqUaNaBS/uQc7v4Vj92Cjv5lPx5DIyRBQYk4Hipy5vwD9AQKIG8uRvdaN9R+pAvrtcQ==}
+  ai@6.0.199:
+    resolution: {integrity: sha512-6H9RPEjzBQECM+eU1JxAh6jHcZPU/6q5QZ8D8QV8agubf0Mm/kcBlwqrFcFtup6RQzmEvMkVaQOoLCZ8bQ13lA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -982,8 +982,8 @@ packages:
   gsap@3.15.0:
     resolution: {integrity: sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==}
 
-  hono@4.12.23:
-    resolution: {integrity: sha512-eIaZ9qDgu7XV0pxOCrg7/WhnQ6Ivm22UcxhXx/A3dcbqbbYgBEkc6e/J/s7j2tS96zoB0S9VBdLwQNCWwUo4LA==}
+  hono@4.12.25:
+    resolution: {integrity: sha512-2NFaIyNVgJmBs/ecmtGzlmluTFs5cHEWGTdu0t1HBwYzoGXOL5nUQBRMXsXWla5i4KkG//QMzVP88m1+I3fdAQ==}
     engines: {node: '>=16.9.0'}
 
   json-schema@0.4.0:
@@ -1336,7 +1336,7 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/gateway@3.0.125(zod@4.4.3)':
+  '@ai-sdk/gateway@3.0.127(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 3.0.10
       '@ai-sdk/provider-utils': 4.0.27(zod@4.4.3)
@@ -1511,9 +1511,9 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@hono/zod-validator@0.8.0(hono@4.12.23)(zod@4.4.3)':
+  '@hono/zod-validator@0.8.0(hono@4.12.25)(zod@4.4.3)':
     dependencies:
-      hono: 4.12.23
+      hono: 4.12.25
       zod: 4.4.3
 
   '@img/colour@1.1.0': {}
@@ -1872,9 +1872,9 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  ai@6.0.197(zod@4.4.3):
+  ai@6.0.199(zod@4.4.3):
     dependencies:
-      '@ai-sdk/gateway': 3.0.125(zod@4.4.3)
+      '@ai-sdk/gateway': 3.0.127(zod@4.4.3)
       '@ai-sdk/provider': 3.0.10
       '@ai-sdk/provider-utils': 4.0.27(zod@4.4.3)
       '@opentelemetry/api': 1.9.1
@@ -1948,7 +1948,7 @@ snapshots:
 
   gsap@3.15.0: {}
 
-  hono@4.12.23: {}
+  hono@4.12.25: {}
 
   json-schema@0.4.0: {}
 
