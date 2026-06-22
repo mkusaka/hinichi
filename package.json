@@ -27,7 +27,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.40.2",
     "@cloudflare/vitest-pool-workers": "0.16.15",
-    "@cloudflare/workers-types": "4.20260613.1",
+    "@cloudflare/workers-types": "4.20260615.1",
     "@vitest/runner": "4.1.8",
     "@vitest/snapshot": "4.1.8",
     "oxfmt": "0.54.0",
