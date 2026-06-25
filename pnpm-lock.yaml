@@ -13,10 +13,10 @@ importers:
         version: 3.0.83(zod@4.4.3)
       '@hono/zod-validator':
         specifier: ^0.8.0
-        version: 0.8.0(hono@4.12.25)(zod@4.4.3)
+        version: 0.8.0(hono@4.12.26)(zod@4.4.3)
       ai:
         specifier: ^6.0.79
-        version: 6.0.207(zod@4.4.3)
+        version: 6.0.208(zod@4.4.3)
       feed:
         specifier: ^5.2.0
         version: 5.2.1
@@ -25,7 +25,7 @@ importers:
         version: 3.15.0
       hono:
         specifier: ^4.11.9
-        version: 4.12.25
+        version: 4.12.26
       three:
         specifier: ^0.184.0
         version: 0.184.0
@@ -908,8 +908,8 @@ packages:
   '@vitest/utils@4.1.9':
     resolution: {integrity: sha512-A51o8ymO5PpqlWNnBP9ZHPXDIpuMtTLlGSjN7la4US+LJzoUMyhwjA5QXlm39JexgwHKW4Xjs8Z2d3dLCXOeuA==}
 
-  ai@6.0.207:
-    resolution: {integrity: sha512-9rAHnqU+AvxyqO6WgiWj7hQENX6AprHXZWZEdBWwgnA854D2Mje/PiTmbcFqO+2Cck1lII0NLRQJY9lmdSorMw==}
+  ai@6.0.208:
+    resolution: {integrity: sha512-STz+AaZqJ4ZjH7UkpXkbHx+bjgIDOsE8fIUoZjkZ2whoZcfVmG9K/TqEKouJZ03SuZuD7lagntlU3zBhAEkRpQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -982,8 +982,8 @@ packages:
   gsap@3.15.0:
     resolution: {integrity: sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==}
 
-  hono@4.12.25:
-    resolution: {integrity: sha512-2NFaIyNVgJmBs/ecmtGzlmluTFs5cHEWGTdu0t1HBwYzoGXOL5nUQBRMXsXWla5i4KkG//QMzVP88m1+I3fdAQ==}
+  hono@4.12.26:
+    resolution: {integrity: sha512-uyZtpnYxM9CmQ7QsQknM4zN8EftNqhON1qYeIKM0Se67CCEe2c44xyGURwB0axX2fBDu1dqHrHAc1hmNT8ITkw==}
     engines: {node: '>=16.9.0'}
 
   json-schema@0.4.0:
@@ -1507,9 +1507,9 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@hono/zod-validator@0.8.0(hono@4.12.25)(zod@4.4.3)':
+  '@hono/zod-validator@0.8.0(hono@4.12.26)(zod@4.4.3)':
     dependencies:
-      hono: 4.12.25
+      hono: 4.12.26
       zod: 4.4.3
 
   '@img/colour@1.1.0': {}
@@ -1868,7 +1868,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  ai@6.0.207(zod@4.4.3):
+  ai@6.0.208(zod@4.4.3):
     dependencies:
       '@ai-sdk/gateway': 3.0.133(zod@4.4.3)
       '@ai-sdk/provider': 3.0.10
@@ -1944,7 +1944,7 @@ snapshots:
 
   gsap@3.15.0: {}
 
-  hono@4.12.25: {}
+  hono@4.12.26: {}
 
   json-schema@0.4.0: {}
 
