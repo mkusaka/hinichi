@@ -13,7 +13,7 @@ importers:
         version: 3.0.83(zod@4.4.3)
       '@hono/zod-validator':
         specifier: ^0.8.0
-        version: 0.8.0(hono@4.12.26)(zod@4.4.3)
+        version: 0.8.0(hono@4.12.27)(zod@4.4.3)
       ai:
         specifier: ^6.0.79
         version: 6.0.208(zod@4.4.3)
@@ -25,7 +25,7 @@ importers:
         version: 3.15.0
       hono:
         specifier: ^4.11.9
-        version: 4.12.26
+        version: 4.12.27
       three:
         specifier: ^0.184.0
         version: 0.184.0
@@ -982,8 +982,8 @@ packages:
   gsap@3.15.0:
     resolution: {integrity: sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==}
 
-  hono@4.12.26:
-    resolution: {integrity: sha512-uyZtpnYxM9CmQ7QsQknM4zN8EftNqhON1qYeIKM0Se67CCEe2c44xyGURwB0axX2fBDu1dqHrHAc1hmNT8ITkw==}
+  hono@4.12.27:
+    resolution: {integrity: sha512-1yrb/+w6HWQJrUCLkJ2IF5jNIPvvFkblV5RNOYl6bV+OA6p9GLcMpHFFGTosSvHvcAUibuUukRqhlYI4z32C7Q==}
     engines: {node: '>=16.9.0'}
 
   json-schema@0.4.0:
@@ -1507,9 +1507,9 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@hono/zod-validator@0.8.0(hono@4.12.26)(zod@4.4.3)':
+  '@hono/zod-validator@0.8.0(hono@4.12.27)(zod@4.4.3)':
     dependencies:
-      hono: 4.12.26
+      hono: 4.12.27
       zod: 4.4.3
 
   '@img/colour@1.1.0': {}
@@ -1944,7 +1944,7 @@ snapshots:
 
   gsap@3.15.0: {}
 
-  hono@4.12.26: {}
+  hono@4.12.27: {}
 
   json-schema@0.4.0: {}
 
