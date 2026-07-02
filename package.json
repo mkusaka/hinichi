@@ -25,8 +25,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.42.2",
-    "@cloudflare/vitest-pool-workers": "0.16.19",
+    "@cloudflare/vite-plugin": "1.42.3",
+    "@cloudflare/vitest-pool-workers": "0.16.20",
     "@cloudflare/workers-types": "4.20260625.1",
     "@vitest/runner": "4.1.9",
     "@vitest/snapshot": "4.1.9",
@@ -35,6 +35,6 @@
     "typescript": "6.0.3",
     "vite": "8.1.0",
     "vitest": "4.1.9",
-    "wrangler": "4.104.0"
+    "wrangler": "4.105.0"
   }
 }
