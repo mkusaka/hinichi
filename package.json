@@ -15,7 +15,7 @@
     "format:check": "oxfmt --check src"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.24",
+    "@ai-sdk/google": "^4.0.0",
     "@hono/zod-validator": "^0.8.0",
     "ai": "^6.0.79",
     "feed": "^5.2.0",
