@@ -168,13 +168,13 @@ importers:
     dependencies:
       '@ai-sdk/google':
         specifier: ^4.0.0
-        version: 4.0.69(zod@4.6.4)
+        version: 4.0.69(zod@4.6.5)
       '@hono/zod-validator':
         specifier: ^0.9.0
-        version: 0.9.1(hono@4.13.7)(zod@4.6.4)
+        version: 0.9.1(hono@4.13.7)(zod@4.6.5)
       ai:
         specifier: ^7.0.0
-        version: 7.0.99(zod@4.6.4)
+        version: 7.0.99(zod@4.6.5)
       feed:
         specifier: ^5.2.0
         version: 5.2.1
@@ -189,7 +189,7 @@ importers:
         version: 0.186.0
       zod:
         specifier: ^4.3.6
-        version: 4.6.4
+        version: 4.6.5
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: 1.54.8
@@ -1825,32 +1825,32 @@ packages:
   zod@4.4.3:
     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
-  zod@4.6.4:
-    resolution: {integrity: sha512-AXSD6hvGdvRjajG/l1cC+d6IrhH+sjmPKtYeQdJIK8MFJl3LyClzS+o/YsVC+zQZPupAaeH5skwwm8YqYH7BqA==}
+  zod@4.6.5:
+    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
 snapshots:
 
-  '@ai-sdk/gateway@4.0.80(zod@4.6.4)':
+  '@ai-sdk/gateway@4.0.80(zod@4.6.5)':
     dependencies:
       '@ai-sdk/provider': 4.0.14
-      '@ai-sdk/provider-utils': 5.0.40(zod@4.6.4)
+      '@ai-sdk/provider-utils': 5.0.40(zod@4.6.5)
       '@vercel/oidc': 3.2.0
-      zod: 4.6.4
+      zod: 4.6.5
 
-  '@ai-sdk/google@4.0.69(zod@4.6.4)':
+  '@ai-sdk/google@4.0.69(zod@4.6.5)':
     dependencies:
       '@ai-sdk/provider': 4.0.14
-      '@ai-sdk/provider-utils': 5.0.40(zod@4.6.4)
-      zod: 4.6.4
+      '@ai-sdk/provider-utils': 5.0.40(zod@4.6.5)
+      zod: 4.6.5
 
-  '@ai-sdk/provider-utils@5.0.40(zod@4.6.4)':
+  '@ai-sdk/provider-utils@5.0.40(zod@4.6.5)':
     dependencies:
       '@ai-sdk/provider': 4.0.14
       '@standard-schema/spec': 1.1.0
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.1
       undici: 7.29.0
-      zod: 4.6.4
+      zod: 4.6.5
 
   '@ai-sdk/provider@4.0.14':
     dependencies:
@@ -2023,10 +2023,10 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@hono/zod-validator@0.9.1(hono@4.13.7)(zod@4.6.4)':
+  '@hono/zod-validator@0.9.1(hono@4.13.7)(zod@4.6.5)':
     dependencies:
       hono: 4.13.7
-      zod: 4.6.4
+      zod: 4.6.5
 
   '@img/colour@1.1.0': {}
 
@@ -2545,12 +2545,12 @@ snapshots:
 
   '@workflow/serde@4.1.0': {}
 
-  ai@7.0.99(zod@4.6.4):
+  ai@7.0.99(zod@4.6.5):
     dependencies:
-      '@ai-sdk/gateway': 4.0.80(zod@4.6.4)
+      '@ai-sdk/gateway': 4.0.80(zod@4.6.5)
       '@ai-sdk/provider': 4.0.14
-      '@ai-sdk/provider-utils': 5.0.40(zod@4.6.4)
-      zod: 4.6.4
+      '@ai-sdk/provider-utils': 5.0.40(zod@4.6.5)
+      zod: 4.6.5
 
   assertion-error@2.0.1: {}
 
@@ -3031,4 +3031,4 @@ snapshots:
 
   zod@4.4.3: {}
 
-  zod@4.6.4: {}
+  zod@4.6.5: {}
